@@ -1,0 +1,10 @@
+{
+  "name": "payments-service",
+  "version": "1.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Sample merchant payments service used as the target repository for the agent workflow demo.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

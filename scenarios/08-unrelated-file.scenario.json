@@ -1,0 +1,11 @@
+{
+  "id": "08-unrelated-file",
+  "title": "Workflow attempts to modify an unrelated file",
+  "demonstrates": ["The workflow attempts to modify an unrelated file"],
+  "description": "Alongside a correct implementation, the developer also edits src/settlement.js (owned by another team, outside the design scope). The policy guard rejects the whole change set before anything touches the workspace, and the developer resubmits within scope.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-unrelated.json", "dev.v2.json"] },
+  "faults": [],
+  "expect": { "status": "AWAITING_APPROVAL", "iterations": 2 }
+}

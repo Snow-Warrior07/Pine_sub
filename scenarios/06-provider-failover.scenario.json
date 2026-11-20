@@ -1,0 +1,23 @@
+{
+  "id": "06-provider-failover",
+  "title": "Model provider becomes unavailable mid-workflow: failover",
+  "demonstrates": [
+    "The model provider becomes unavailable mid-workflow"
+  ],
+  "description": "The primary provider starts returning 503 at the developer step. The gateway retries with exponential backoff, the circuit breaker opens, and the remaining calls fail over to the secondary model. Every failed attempt is recorded in the usage log.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": {},
+  "faults": [
+    {
+      "type": "unavailable",
+      "provider": "primary",
+      "times": 99,
+      "startAt": "developer.implement"
+    }
+  ],
+  "expect": {
+    "status": "AWAITING_APPROVAL",
+    "iterations": 1
+  }
+}

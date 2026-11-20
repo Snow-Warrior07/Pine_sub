@@ -1,0 +1,68 @@
+{
+  "runId": "demo-09-repeat-action",
+  "scenario": "09-repeat-action",
+  "status": "ESCALATED",
+  "iterations": 2,
+  "modelCalls": 7,
+  "failedCalls": 0,
+  "inputTokens": 11399,
+  "outputTokens": 5753,
+  "costUsd": 0.1607,
+  "modelLatencyMs": 72186,
+  "simulated": true,
+  "score": null,
+  "byAgent": {
+    "analyst": {
+      "calls": 1,
+      "inputTokens": 363,
+      "outputTokens": 789,
+      "costUsd": 0.017232,
+      "latencyMs": 9918
+    },
+    "architect": {
+      "calls": 1,
+      "inputTokens": 1787,
+      "outputTokens": 766,
+      "costUsd": 0.022468,
+      "latencyMs": 9642
+    },
+    "qa": {
+      "calls": 2,
+      "inputTokens": 1589,
+      "outputTokens": 954,
+      "costUsd": 0.025436,
+      "latencyMs": 12348
+    },
+    "developer": {
+      "calls": 2,
+      "inputTokens": 5104,
+      "outputTokens": 3210,
+      "costUsd": 0.084616,
+      "latencyMs": 39420
+    },
+    "security": {
+      "calls": 1,
+      "inputTokens": 2556,
+      "outputTokens": 34,
+      "costUsd": 0.010904,
+      "latencyMs": 858
+    }
+  },
+  "byProvider": {
+    "mock-primary": 7
+  },
+  "gates": [
+    {
+      "n": 1,
+      "gate": "fail",
+      "tests": "14/15",
+      "sast": 0
+    },
+    {
+      "n": 2,
+      "gate": "no_progress",
+      "tests": "-",
+      "sast": 0
+    }
+  ]
+}

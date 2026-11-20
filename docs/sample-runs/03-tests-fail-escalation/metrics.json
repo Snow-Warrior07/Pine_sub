@@ -1,0 +1,74 @@
+{
+  "runId": "demo-03-tests-fail-escalation",
+  "scenario": "03-tests-fail-escalation",
+  "status": "ESCALATED",
+  "iterations": 3,
+  "modelCalls": 12,
+  "failedCalls": 0,
+  "inputTokens": 21620,
+  "outputTokens": 7522,
+  "costUsd": 0.2369,
+  "modelLatencyMs": 95664,
+  "simulated": true,
+  "score": null,
+  "byAgent": {
+    "analyst": {
+      "calls": 1,
+      "inputTokens": 363,
+      "outputTokens": 789,
+      "costUsd": 0.017232,
+      "latencyMs": 9918
+    },
+    "architect": {
+      "calls": 1,
+      "inputTokens": 1787,
+      "outputTokens": 766,
+      "costUsd": 0.022468,
+      "latencyMs": 9642
+    },
+    "qa": {
+      "calls": 4,
+      "inputTokens": 3598,
+      "outputTokens": 1044,
+      "costUsd": 0.035272,
+      "latencyMs": 14328
+    },
+    "developer": {
+      "calls": 3,
+      "inputTokens": 8184,
+      "outputTokens": 4821,
+      "costUsd": 0.129156,
+      "latencyMs": 59202
+    },
+    "security": {
+      "calls": 3,
+      "inputTokens": 7688,
+      "outputTokens": 102,
+      "costUsd": 0.032792,
+      "latencyMs": 2574
+    }
+  },
+  "byProvider": {
+    "mock-primary": 12
+  },
+  "gates": [
+    {
+      "n": 1,
+      "gate": "fail",
+      "tests": "14/15",
+      "sast": 0
+    },
+    {
+      "n": 2,
+      "gate": "fail",
+      "tests": "14/15",
+      "sast": 0
+    },
+    {
+      "n": 3,
+      "gate": "fail",
+      "tests": "14/15",
+      "sast": 0
+    }
+  ]
+}

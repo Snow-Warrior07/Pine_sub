@@ -1,0 +1,14 @@
+{
+  "id": "05-malformed-output",
+  "title": "Agents return malformed and unsupported output",
+  "demonstrates": ["An agent returns malformed or unsupported output"],
+  "description": "The analyst assigns a task to an agent that does not exist (\"deploy_bot\"); the schema validator rejects the unsupported value and re-prompts. The architect returns prose with a truncated JSON object; the parser rejects it and re-prompts. Both recover within the repair budget, and nothing invalid ever reaches the workspace.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": {},
+  "faults": [
+    { "type": "respond", "task": "analyst.clarify", "times": 1, "payloadFile": "responses/analyst.unsupported.json" },
+    { "type": "respond", "task": "architect.design", "times": 1, "payloadFile": "responses/architect.malformed.txt" }
+  ],
+  "expect": { "status": "AWAITING_APPROVAL", "iterations": 1 }
+}

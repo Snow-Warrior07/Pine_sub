@@ -1,7 +1,4 @@
 node_modules/
-.next/
+runs/
 .env
-.env.local
-traces/
-report-*.md
 *.log

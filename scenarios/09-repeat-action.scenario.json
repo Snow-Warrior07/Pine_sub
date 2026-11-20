@@ -1,0 +1,11 @@
+{
+  "id": "09-repeat-action",
+  "title": "Workflow attempts to repeat an action",
+  "demonstrates": ["The workflow attempts to repeat an action"],
+  "description": "After a failed iteration, the developer returns the identical change set again. The orchestrator detects the repeat by content hash, refuses to re-apply or re-test it, and escalates instead of burning the iteration budget. (Merge and deploy are also idempotent: approving twice does not merge twice; see 01-happy-path.)",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-bug.json", "dev.v1-bug.json"] },
+  "faults": [],
+  "expect": { "status": "ESCALATED", "iterations": 2 }
+}

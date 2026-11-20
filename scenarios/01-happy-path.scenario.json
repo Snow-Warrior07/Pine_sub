@@ -1,0 +1,11 @@
+{
+  "id": "01-happy-path",
+  "title": "Minimum demo: one requirement end to end, with one failed check",
+  "demonstrates": ["Minimum successful demonstration", "Generated code fails tests"],
+  "description": "REQ-101 goes through analysis, design, QA-first acceptance tests and implementation. The first implementation ignores earlier partial refunds, so acceptance test AC-2 fails. QA feedback goes back to the developer, iteration 2 passes every gate, and the run stops at the human approval checkpoint.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-bug.json", "dev.v2.json"] },
+  "faults": [],
+  "expect": { "status": "AWAITING_APPROVAL", "iterations": 2 }
+}

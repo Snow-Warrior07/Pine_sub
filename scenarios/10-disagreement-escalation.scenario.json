@@ -1,0 +1,27 @@
+{
+  "id": "10-disagreement-escalation",
+  "title": "Persistent architect/developer disagreement escalates to a human",
+  "demonstrates": [
+    "Architect and developer agents disagree",
+    "Where autonomy stops"
+  ],
+  "description": "The developer proposes the PARTIAL_REFUND ledger change, the architect rejects it, and the developer comes back with the same proposal. After one negotiation round the orchestrator stops and asks a human to decide, recording both positions, instead of letting the agents argue or letting either side win silently. The human then rules for the architect with `resume --guidance`; the developer implements within the design and the run continues to the approval gate.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": {
+    "developer.implement": [
+      "dev.v1-deviation.json",
+      "dev.v1-deviation.json",
+      "dev.v2.json"
+    ]
+  },
+  "deviationDecisions": [
+    "reject",
+    "reject"
+  ],
+  "faults": [],
+  "expect": {
+    "status": "ESCALATED",
+    "iterations": 2
+  }
+}

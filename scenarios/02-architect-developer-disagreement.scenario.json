@@ -1,0 +1,12 @@
+{
+  "id": "02-architect-developer-disagreement",
+  "title": "Architect and developer agents disagree",
+  "demonstrates": ["Architect and developer agents disagree"],
+  "description": "The developer wants a new PARTIAL_REFUND ledger entry type and edits src/ledger.js, which the design forbids (ADR-2, Finance-owned). The orchestrator routes the deviation to the architect, who rejects it with a rationale. The developer re-implements within the design. A second rejection on the same point would escalate to a human with both positions.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-deviation.json", "dev.v2.json"] },
+  "deviationDecisions": ["reject"],
+  "faults": [],
+  "expect": { "status": "AWAITING_APPROVAL", "iterations": 2 }
+}

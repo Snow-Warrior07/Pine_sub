@@ -1,0 +1,11 @@
+{
+  "id": "03-tests-fail-escalation",
+  "title": "Generated code keeps failing tests: bounded iteration, then escalation",
+  "demonstrates": ["Generated code fails tests", "Bounded iteration"],
+  "description": "Three different implementations all miss the cumulative-refund rule (AC-2). After the third failure the iteration budget is spent and the run escalates to a human with the last feedback, instead of looping.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-bug.json", "dev.v1-bug-b.json", "dev.v1-bug-c.json"] },
+  "faults": [],
+  "expect": { "status": "ESCALATED", "iterations": 3 }
+}

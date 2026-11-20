@@ -1,0 +1,678 @@
+{
+  "runId": "demo-05-malformed-output",
+  "scenario": "05-malformed-output",
+  "requirementPath": "requirements/REQ-101-partial-refunds.md",
+  "requirementText": "# REQ-101: Partial refunds for captured payments\n\n**Requested by:** Merchant Experience PM\n**Priority:** P1 (top merchant ask this quarter)\n\nMerchants today can only refund the full amount of a payment. They need to refund part\nof a captured payment, for example when one item of a multi-item order is returned.\n\n- A captured payment can be refunded in one or more parts.\n- The total refunded must never exceed the captured amount.\n- Merchants' systems retry on network failures, so a retried refund request must not\n  refund twice.\n- Finance needs every refund to appear in the ledger.\n- Card numbers must never appear in logs (PCI DSS).\n",
+  "repoPath": "sample-repo/payments-service",
+  "workspace": "/home/user/Pine_sub/runs/demo-05-malformed-output/workspace",
+  "branch": "agent/demo-05-malformed-output",
+  "status": "AWAITING_APPROVAL",
+  "statusReason": "All gates passed. Merge and deployment need human approval.",
+  "createdAt": "2026-11-20T18:35:11.455Z",
+  "updatedAt": "2026-11-20T18:35:11.954Z",
+  "completedSteps": [
+    "intake",
+    "analysis",
+    "inspection",
+    "architecture",
+    "test_authoring",
+    "implementation",
+    "evaluation",
+    "release"
+  ],
+  "resumeCount": 0,
+  "artifacts": {
+    "iterations": [
+      {
+        "n": 1,
+        "developerSummary": "Add refund service with cumulative-balance guard, per-payment idempotency keys and REFUND ledger entries",
+        "filesChanged": [
+          "src/payments.js",
+          "src/refunds.js",
+          "test/refunds.test.js"
+        ],
+        "changesetHash": "13b830b4cf183b48",
+        "policyViolations": [],
+        "deviations": [],
+        "gate": "pass",
+        "feedback": [],
+        "checks": {
+          "tests": {
+            "passed": 15,
+            "failed": 0,
+            "total": 15,
+            "failures": [],
+            "durationMs": 151,
+            "timedOut": false,
+            "rawTail": "  duration_ms: 0.510257\n  type: 'test'\n  ...\n# Subtest: rejects a single refund larger than the payment\nok 15 - rejects a single refund larger than the payment\n  ---\n  duration_ms: 0.132973\n  type: 'test'\n  ...\n1..15\n# tests 15\n# suites 0\n# pass 15\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 95.547343\n# start of coverage report\n# -----------------------------------------------------------------------------\n# file                         | line % | branch % | funcs % | uncovered lines\n# -----------------------------------------------------------------------------\n# src                          |        |          |         | \n#  ledger.js                   |  75.00 |    66.67 |   50.00 | 7-8 15-16\n#  logger.js                   | 100.00 |    91.67 |   75.00 | \n#  money.js                    |  81.82 |   100.00 |   50.00 | 10-11\n#  payments.js                 |  96.67 |    72.73 |  100.00 | 38-39\n#  refunds.js                  | 100.00 |    88.89 |  100.00 | \n#  settlement.js               | 100.00 |    85.71 |  100.00 | \n#  store.js                    | 100.00 |   100.00 |  100.00 | \n# test                         |        |          |         | \n#  acceptance                  |        |          |         | \n#   refunds.acceptance.test.js | 100.00 |   100.00 |  100.00 | \n#  payments.test.js            | 100.00 |   100.00 |  100.00 | \n#  refunds.test.js             | 100.00 |   100.00 |  100.00 | \n# -----------------------------------------------------------------------------\n# all files                    |  97.65 |    91.40 |   94.12 | \n# -----------------------------------------------------------------------------\n# end of coverage report\n"
+          },
+          "coverage": {
+            "linePct": 93.36,
+            "threshold": 80,
+            "ok": true
+          },
+          "lint": [],
+          "sast": []
+        },
+        "qa": {
+          "verdict": "pass",
+          "failing_criteria": [],
+          "feedback_for_developer": "All 15 tests pass, coverage 93.36%, no lint issues."
+        },
+        "security": {
+          "verdict": "pass",
+          "findings": [],
+          "summary": "No blocking findings. Diff reviewed for PAN exposure, secrets, injection and authorisation."
+        }
+      }
+    ],
+    "analysis": {
+      "summary": "Allow merchants to refund a captured payment in one or more parts, never exceeding the captured amount, safely under client retries, with every refund in the ledger and no card data in logs.",
+      "acceptance_criteria": [
+        {
+          "id": "AC-1",
+          "given": "a CAPTURED payment of INR 100.00",
+          "when": "the merchant refunds INR 30.00",
+          "then": "the refund succeeds, refundedAmount is 3000 paise and the status is PARTIALLY_REFUNDED"
+        },
+        {
+          "id": "AC-2",
+          "given": "a payment with INR 60.00 of 100.00 already refunded",
+          "when": "the merchant requests a further INR 50.00 refund",
+          "then": "the request is rejected and refundedAmount stays 6000 paise"
+        },
+        {
+          "id": "AC-3",
+          "given": "a partially refunded payment",
+          "when": "the remaining balance is refunded",
+          "then": "the status becomes REFUNDED"
+        },
+        {
+          "id": "AC-4",
+          "given": "a refund request with idempotency key K",
+          "when": "the same request with key K is retried",
+          "then": "the original refund is returned and no second refund or ledger entry is created"
+        },
+        {
+          "id": "AC-5",
+          "given": "a payment that is not captured, or an amount that is zero or not whole paise",
+          "when": "a refund is requested",
+          "then": "the request is rejected"
+        },
+        {
+          "id": "AC-6",
+          "given": "any successful refund",
+          "when": "it is processed",
+          "then": "a REFUND ledger entry with the refunded amount exists and no log line contains the card number"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T-1",
+          "title": "Identify impacted modules and define the refund API",
+          "owner_agent": "architect",
+          "depends_on": []
+        },
+        {
+          "id": "T-2",
+          "title": "Write acceptance tests for AC-1..AC-6",
+          "owner_agent": "qa",
+          "depends_on": [
+            "T-1"
+          ]
+        },
+        {
+          "id": "T-3",
+          "title": "Implement partial refunds with idempotency keys",
+          "owner_agent": "developer",
+          "depends_on": [
+            "T-1"
+          ]
+        },
+        {
+          "id": "T-4",
+          "title": "Run unit, acceptance, coverage and lint checks",
+          "owner_agent": "qa",
+          "depends_on": [
+            "T-2",
+            "T-3"
+          ]
+        },
+        {
+          "id": "T-5",
+          "title": "Security review of the diff (PCI: PAN exposure)",
+          "owner_agent": "security",
+          "depends_on": [
+            "T-3"
+          ]
+        },
+        {
+          "id": "T-6",
+          "title": "Assemble release evidence and request approval",
+          "owner_agent": "release",
+          "depends_on": [
+            "T-4",
+            "T-5"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Amounts are integer paise, as in the existing service.",
+        "Idempotency keys are unique per payment, not globally.",
+        "Existing full-refund behaviour (refundPayment) must keep working."
+      ],
+      "open_questions": [
+        "Should partial refunds be limited by the 180-day refund window in config/gateway.config.json? Assumed out of scope for this change."
+      ],
+      "out_of_scope": [
+        "Refund window enforcement",
+        "Asynchronous refund settlement with the acquirer",
+        "Merchant-facing API endpoints"
+      ]
+    },
+    "inspection": {
+      "files": [
+        {
+          "path": "src/ledger.js",
+          "lines": 17,
+          "exports": [
+            "ENTRY_TYPES",
+            "recordEntry",
+            "entriesFor"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/logger.js",
+          "lines": 25,
+          "exports": [
+            "setLogSink",
+            "redact",
+            "log"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/money.js",
+          "lines": 12,
+          "exports": [
+            "assertAmount",
+            "formatINR"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/payments.js",
+          "lines": 52,
+          "exports": [
+            "PaymentStatus",
+            "createPaymentService"
+          ],
+          "imports": [
+            "src/money.js",
+            "src/ledger.js",
+            "src/logger.js"
+          ]
+        },
+        {
+          "path": "src/settlement.js",
+          "lines": 12,
+          "exports": [
+            "settlementTotals"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/store.js",
+          "lines": 9,
+          "exports": [
+            "createStore"
+          ],
+          "imports": []
+        },
+        {
+          "path": "test/payments.test.js",
+          "lines": 47,
+          "exports": [],
+          "imports": [
+            "src/store.js",
+            "src/payments.js",
+            "src/logger.js",
+            "src/settlement.js"
+          ]
+        }
+      ],
+      "keywordHits": [
+        {
+          "path": "src/payments.js",
+          "keyword": "payment",
+          "count": 51
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "payment",
+          "count": 20
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "refund",
+          "count": 10
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "amount",
+          "count": 9
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "refund",
+          "count": 8
+        },
+        {
+          "path": "src/money.js",
+          "keyword": "amount",
+          "count": 7
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "payment",
+          "count": 5
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "captured",
+          "count": 5
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "refunded",
+          "count": 4
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "merchant",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "captured",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "merchant",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "amount",
+          "count": 3
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "amount",
+          "count": 2
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "merchant",
+          "count": 2
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "payment",
+          "count": 2
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "refund",
+          "count": 1
+        },
+        {
+          "path": "src/logger.js",
+          "keyword": "payment",
+          "count": 1
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "partial",
+          "count": 1
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "amount",
+          "count": 1
+        },
+        {
+          "path": "src/store.js",
+          "keyword": "refund",
+          "count": 1
+        },
+        {
+          "path": "src/store.js",
+          "keyword": "payment",
+          "count": 1
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "refunded",
+          "count": 1
+        }
+      ],
+      "dependents": {
+        "src/money.js": [
+          "src/payments.js"
+        ],
+        "src/ledger.js": [
+          "src/payments.js"
+        ],
+        "src/logger.js": [
+          "src/payments.js",
+          "test/payments.test.js"
+        ],
+        "src/store.js": [
+          "test/payments.test.js"
+        ],
+        "src/payments.js": [
+          "test/payments.test.js"
+        ],
+        "src/settlement.js": [
+          "test/payments.test.js"
+        ]
+      }
+    },
+    "design": {
+      "impacted_components": [
+        {
+          "path": "src/refunds.js",
+          "change_type": "create",
+          "reason": "New refund service: partial refunds, cumulative guard, idempotency index."
+        },
+        {
+          "path": "src/payments.js",
+          "change_type": "modify",
+          "reason": "Add PARTIALLY_REFUNDED status and refundedAmount field; keep refundPayment behaviour."
+        },
+        {
+          "path": "test/refunds.test.js",
+          "change_type": "create",
+          "reason": "Developer unit tests for the refund service."
+        },
+        {
+          "path": "src/ledger.js",
+          "change_type": "read_only",
+          "reason": "Refunds are recorded with the existing REFUND entry type."
+        },
+        {
+          "path": "src/settlement.js",
+          "change_type": "read_only",
+          "reason": "Already nets REFUND entries per merchant; no change needed."
+        },
+        {
+          "path": "src/logger.js",
+          "change_type": "read_only",
+          "reason": "Use redact() or log identifiers only."
+        }
+      ],
+      "approach": "Add a createRefundService(store) module that validates the amount, checks the payment is CAPTURED or PARTIALLY_REFUNDED, enforces refundedAmount + amount <= amount, deduplicates on (paymentId, idempotencyKey), updates the payment status and writes a REFUND ledger entry referencing the refund id.",
+      "api_contract": [
+        "createRefundService(store) -> { refund({ paymentId, amount, idempotencyKey }) -> { id, paymentId, amount, idempotencyKey, status: 'SUCCEEDED' }, listRefunds(paymentId) -> refund[] }",
+        "refund() throws when idempotencyKey is missing, the amount is invalid, the payment is not refundable, or the amount exceeds the remaining balance",
+        "payments gain refundedAmount (paise) and the PaymentStatus.PARTIALLY_REFUNDED status"
+      ],
+      "allowed_files": [
+        "src/refunds.js",
+        "src/payments.js",
+        "test/refunds.test.js"
+      ],
+      "forbidden_files": [
+        {
+          "path": "src/ledger.js",
+          "reason": "Owned by the Finance platform team; entry types are a closed set (ADR-2)."
+        },
+        {
+          "path": "src/settlement.js",
+          "reason": "Owned by the Settlements team; unaffected by this change."
+        },
+        {
+          "path": "config/gateway.config.json",
+          "reason": "Protected configuration (SRE)."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "ADR-1",
+          "decision": "Partial refunds live in a new module, src/refunds.js",
+          "rationale": "Keeps payments.js small and isolates the new behaviour for review and rollback."
+        },
+        {
+          "id": "ADR-2",
+          "decision": "Use the existing REFUND ledger entry type for partial refunds",
+          "rationale": "Ledger entry types are agreed with Finance; settlement already nets REFUND entries correctly."
+        },
+        {
+          "id": "ADR-3",
+          "decision": "Idempotency keys are scoped per payment and stored in memory for now",
+          "rationale": "Matches the in-memory store; flagged as a known risk for multi-instance deployment."
+        }
+      ],
+      "risks": [
+        "In-memory idempotency index is lost on restart.",
+        "Concurrent refunds on one payment are not serialised."
+      ]
+    },
+    "qaTests": {
+      "test_file": "test/acceptance/refunds.acceptance.test.js",
+      "content": "[3386 chars]",
+      "criteria_covered": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ]
+    },
+    "evaluation": {
+      "score": 100,
+      "maxScore": 100,
+      "criteria": [
+        {
+          "name": "Acceptance criteria verified by passing tests",
+          "max": 30,
+          "points": 30,
+          "detail": "6/6 (AC-1, AC-2, AC-3, AC-4, AC-5, AC-6)"
+        },
+        {
+          "name": "Full test suite green",
+          "max": 20,
+          "points": 20,
+          "detail": "15/15 passed"
+        },
+        {
+          "name": "No critical/high security findings",
+          "max": 15,
+          "points": 15,
+          "detail": "0 blocking, 0 total"
+        },
+        {
+          "name": "Stayed within the design scope",
+          "max": 10,
+          "points": 10,
+          "detail": "3 file(s), all allowed"
+        },
+        {
+          "name": "Coverage >= 80%",
+          "max": 10,
+          "points": 10,
+          "detail": "93.36%"
+        },
+        {
+          "name": "Change size vs human baseline",
+          "max": 10,
+          "points": 10,
+          "detail": "110 vs 85 lines (1.29x)"
+        },
+        {
+          "name": "Iterations to converge",
+          "max": 5,
+          "points": 5,
+          "detail": "1 of 3"
+        }
+      ],
+      "baseline": {
+        "linesChanged": 85,
+        "testsPassed": 15,
+        "filesTouched": 3
+      },
+      "candidate": {
+        "linesChanged": 110,
+        "testsPassed": 15,
+        "filesTouched": 3
+      }
+    },
+    "finalDiff": "diff --git a/src/payments.js b/src/payments.js\nindex fb55eb6..db02e78 100644\n--- a/src/payments.js\n+++ b/src/payments.js\n@@ -5,6 +5,7 @@ import { log, redact } from './logger.js';\n export const PaymentStatus = Object.freeze({\n   CREATED: 'CREATED',\n   CAPTURED: 'CAPTURED',\n+  PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',\n   REFUNDED: 'REFUNDED',\n });\n \n@@ -12,7 +13,14 @@ export function createPaymentService(store) {\n   function createPayment({ id, merchantId, amount, cardNumber }) {\n     if (store.payments.has(id)) throw new Error(`Payment ${id} already exists`);\n     assertAmount(amount);\n-    const payment = { id, merchantId, amount, cardNumber, status: PaymentStatus.CREATED };\n+    const payment = {\n+      id,\n+      merchantId,\n+      amount,\n+      cardNumber,\n+      refundedAmount: 0,\n+      status: PaymentStatus.CREATED,\n+    };\n     store.payments.set(id, payment);\n     log('payment.created', { payment: redact(payment) });\n     return payment;\n@@ -35,13 +43,14 @@ export function createPaymentService(store) {\n     return payment;\n   }\n \n-  // Full refunds only. Partial refunds are not supported yet.\n+  // Full refund of a captured payment. Partial refunds live in refunds.js.\n   function refundPayment(id) {\n     const payment = getPayment(id);\n     if (payment.status !== PaymentStatus.CAPTURED) {\n       throw new Error(`Cannot refund payment in status ${payment.status}`);\n     }\n     payment.status = PaymentStatus.REFUNDED;\n+    payment.refundedAmount = payment.amount;\n     recordEntry(store, { type: 'REFUND', paymentId: id, amount: payment.amount });\n     log('payment.refunded', { paymentId: id });\n     return payment;\ndiff --git a/src/refunds.js b/src/refunds.js\nnew file mode 100644\nindex 0000000..c0b2121\n--- /dev/null\n+++ b/src/refunds.js\n@@ -0,0 +1,56 @@\n+import { assertAmount } from './money.js';\n+import { recordEntry } from './ledger.js';\n+import { log } from './logger.js';\n+import { PaymentStatus } from './payments.js';\n+\n+const REFUNDABLE = new Set([PaymentStatus.CAPTURED, PaymentStatus.PARTIALLY_REFUNDED]);\n+\n+export function createRefundService(store) {\n+  // Idempotency index: key -> refund. Scoped per payment so keys cannot collide across payments.\n+  const byKey = new Map();\n+\n+  function refund({ paymentId, amount, idempotencyKey }) {\n+    if (!idempotencyKey) throw new Error('idempotencyKey is required');\n+    const scopedKey = `${paymentId}:${idempotencyKey}`;\n+    if (byKey.has(scopedKey)) return byKey.get(scopedKey);\n+\n+    assertAmount(amount);\n+    const payment = store.payments.get(paymentId);\n+    if (!payment) throw new Error(`Payment ${paymentId} not found`);\n+    if (!REFUNDABLE.has(payment.status)) {\n+      throw new Error(`Cannot refund payment in status ${payment.status}`);\n+    }\n+\n+    const alreadyRefunded = payment.refundedAmount ?? 0;\n+    const remaining = payment.amount - alreadyRefunded;\n+    if (amount > remaining) {\n+      throw new RangeError(`Refund of ${amount} exceeds refundable balance of ${remaining}`);\n+    }\n+\n+    const record = {\n+      id: `rf_${store.refunds.size + 1}`,\n+      paymentId,\n+      amount,\n+      idempotencyKey,\n+      status: 'SUCCEEDED',\n+    };\n+    store.refunds.set(record.id, record);\n+    byKey.set(scopedKey, record);\n+\n+    payment.refundedAmount = alreadyRefunded + amount;\n+    payment.status =\n+      payment.refundedAmount === payment.amount\n+        ? PaymentStatus.REFUNDED\n+        : PaymentStatus.PARTIALLY_REFUNDED;\n+\n+    recordEntry(store, { type: 'REFUND', paymentId, amount, reference: record.id });\n+    log('refund.created', { refundId: record.id, paymentId, amount });\n+    return record;\n+  }\n+\n+  function listRefunds(paymentId) {\n+    return [...store.refunds.values()].filter((r) => r.paymentId === paymentId);\n+  }\n+\n+  return { refund, listRefunds };\n+}\ndiff --git a/test/acceptance/refunds.acceptance.test.js b/test/acceptance/refunds.acceptance.test.js\nnew file mode 100644\nindex 0000000..8c23674\n--- /dev/null\n+++ b/test/acceptance/refunds.acceptance.test.js\n@@ -0,0 +1,68 @@\n+// Acceptance tests written by the QA agent from the acceptance criteria, BEFORE the\n+// developer agent writes any code. The developer agent is not allowed to edit this file.\n+import { test } from 'node:test';\n+import assert from 'node:assert/strict';\n+import { createStore } from '../../src/store.js';\n+import { createPaymentService, PaymentStatus } from '../../src/payments.js';\n+import { createRefundService } from '../../src/refunds.js';\n+import { setLogSink } from '../../src/logger.js';\n+\n+const logLines = [];\n+setLogSink((line) => logLines.push(line));\n+\n+function captured(amount = 10000) {\n+  const store = createStore();\n+  const payments = createPaymentService(store);\n+  payments.createPayment({ id: 'pay_1', merchantId: 'm_1', amount, cardNumber: '4111111111111111' });\n+  payments.capturePayment('pay_1');\n+  return { store, payments, refunds: createRefundService(store) };\n+}\n+\n+test('AC-1 partial refund on a captured payment marks it PARTIALLY_REFUNDED', () => {\n+  const { payments, refunds } = captured();\n+  refunds.refund({ paymentId: 'pay_1', amount: 3000, idempotencyKey: 'a' });\n+  const p = payments.getPayment('pay_1');\n+  assert.equal(p.status, PaymentStatus.PARTIALLY_REFUNDED);\n+  assert.equal(p.refundedAmount, 3000);\n+});\n+\n+test('AC-2 cumulative refunds can never exceed the captured amount', () => {\n+  const { payments, refunds } = captured();\n+  refunds.refund({ paymentId: 'pay_1', amount: 6000, idempotencyKey: 'a' });\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_1', amount: 5000, idempotencyKey: 'b' }));\n+  assert.equal(payments.getPayment('pay_1').refundedAmount, 6000);\n+});\n+\n+test('AC-3 refunding the remaining balance marks the payment REFUNDED', () => {\n+  const { payments, refunds } = captured();\n+  refunds.refund({ paymentId: 'pay_1', amount: 4000, idempotencyKey: 'a' });\n+  refunds.refund({ paymentId: 'pay_1', amount: 6000, idempotencyKey: 'b' });\n+  assert.equal(payments.getPayment('pay_1').status, PaymentStatus.REFUNDED);\n+});\n+\n+test('AC-4 a retried request with the same idempotency key refunds only once', () => {\n+  const { store, refunds } = captured();\n+  refunds.refund({ paymentId: 'pay_1', amount: 2000, idempotencyKey: 'retry-me' });\n+  refunds.refund({ paymentId: 'pay_1', amount: 2000, idempotencyKey: 'retry-me' });\n+  assert.equal(store.ledger.filter((e) => e.type === 'REFUND').length, 1);\n+});\n+\n+test('AC-5 refunds are rejected for uncaptured payments and invalid amounts', () => {\n+  const store = createStore();\n+  const payments = createPaymentService(store);\n+  const refunds = createRefundService(store);\n+  payments.createPayment({ id: 'pay_2', merchantId: 'm_1', amount: 5000, cardNumber: '4111111111111111' });\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_2', amount: 100, idempotencyKey: 'a' }));\n+  payments.capturePayment('pay_2');\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_2', amount: 10.5, idempotencyKey: 'b' }));\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_2', amount: 0, idempotencyKey: 'c' }));\n+});\n+\n+test('AC-6 every refund is in the ledger and card numbers never reach the logs', () => {\n+  const { store, refunds } = captured();\n+  logLines.length = 0;\n+  refunds.refund({ paymentId: 'pay_1', amount: 1500, idempotencyKey: 'a' });\n+  const entry = store.ledger.find((e) => e.type === 'REFUND');\n+  assert.equal(entry.amount, 1500);\n+  assert.ok(logLines.every((l) => !l.includes('4111111111111111')));\n+});\ndiff --git a/test/refunds.test.js b/test/refunds.test.js\nnew file mode 100644\nindex 0000000..e325ce4\n--- /dev/null\n+++ b/test/refunds.test.js\n@@ -0,0 +1,41 @@\n+import { test } from 'node:test';\n+import assert from 'node:assert/strict';\n+import { createStore } from '../src/store.js';\n+import { createPaymentService, PaymentStatus } from '../src/payments.js';\n+import { createRefundService } from '../src/refunds.js';\n+import { setLogSink } from '../src/logger.js';\n+\n+setLogSink(() => {});\n+\n+function captured(amount = 10000) {\n+  const store = createStore();\n+  const payments = createPaymentService(store);\n+  payments.createPayment({ id: 'pay_1', merchantId: 'm_1', amount, cardNumber: '4111111111111111' });\n+  payments.capturePayment('pay_1');\n+  return { store, payments, refunds: createRefundService(store) };\n+}\n+\n+test('partially refunds a captured payment', () => {\n+  const { payments, refunds } = captured();\n+  const r = refunds.refund({ paymentId: 'pay_1', amount: 2500, idempotencyKey: 'k1' });\n+  assert.equal(r.status, 'SUCCEEDED');\n+  assert.equal(payments.getPayment('pay_1').status, PaymentStatus.PARTIALLY_REFUNDED);\n+});\n+\n+test('returns the same refund for a repeated idempotency key', () => {\n+  const { refunds } = captured();\n+  const a = refunds.refund({ paymentId: 'pay_1', amount: 1000, idempotencyKey: 'k1' });\n+  const b = refunds.refund({ paymentId: 'pay_1', amount: 1000, idempotencyKey: 'k1' });\n+  assert.equal(a.id, b.id);\n+  assert.equal(refunds.listRefunds('pay_1').length, 1);\n+});\n+\n+test('requires an idempotency key', () => {\n+  const { refunds } = captured();\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_1', amount: 100 }), /idempotencyKey/);\n+});\n+\n+test('rejects a single refund larger than the payment', () => {\n+  const { refunds } = captured();\n+  assert.throws(() => refunds.refund({ paymentId: 'pay_1', amount: 20000, idempotencyKey: 'k1' }), RangeError);\n+});",
+    "release": {
+      "title": "REQ-101: partial refunds (4 files)",
+      "summary": "Adds partial refunds with cumulative-amount guard and idempotency keys. Converged in 1 iteration(s).",
+      "test_evidence": [
+        "15/15 tests passed (regression, developer unit and QA acceptance suites)",
+        "Line coverage 93.36% (threshold 80%)",
+        "Static security scan: 0 finding(s); lint: 0 issue(s)"
+      ],
+      "known_risks": [
+        "Idempotency index is in memory; it must move to the database before multi-instance deployment.",
+        "Concurrent refunds on the same payment are not serialised (single-threaded sample service)."
+      ],
+      "rollback_plan": "Revert the merge commit; no schema or ledger entry-type changes were made, so no data migration is needed.",
+      "recommendation": "approve"
+    }
+  },
+  "usage": [
+    {
+      "at": "2026-11-20T18:35:11.483Z",
+      "agent": "analyst.clarify",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "invalid_output",
+      "inputTokens": 363,
+      "outputTokens": 829,
+      "latencyMs": 10398,
+      "costUsd": 0.018032,
+      "simulated": true,
+      "error": "$.tasks[6].owner_agent: unsupported value \"deploy_bot\" (allowed: analyst, architect, developer, qa, security, release)"
+    },
+    {
+      "at": "2026-11-20T18:35:11.483Z",
+      "agent": "analyst.clarify",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 2,
+      "outcome": "ok",
+      "inputTokens": 419,
+      "outputTokens": 789,
+      "latencyMs": 9918,
+      "costUsd": 0.017456,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.489Z",
+      "agent": "architect.design",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "invalid_output",
+      "inputTokens": 1787,
+      "outputTokens": 68,
+      "latencyMs": 1266,
+      "costUsd": 0.008508,
+      "simulated": true,
+      "error": "invalid JSON: Expected ',' or ']' after array element in JSON at position 118 (line 3 column 90)"
+    },
+    {
+      "at": "2026-11-20T18:35:11.489Z",
+      "agent": "architect.design",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 2,
+      "outcome": "ok",
+      "inputTokens": 1837,
+      "outputTokens": 766,
+      "latencyMs": 9642,
+      "costUsd": 0.022668,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.489Z",
+      "agent": "qa.generate_tests",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 585,
+      "outputTokens": 909,
+      "latencyMs": 11358,
+      "costUsd": 0.02052,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.518Z",
+      "agent": "developer.implement",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2038,
+      "outputTokens": 1614,
+      "latencyMs": 19818,
+      "costUsd": 0.040432,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.698Z",
+      "agent": "qa.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 964,
+      "outputTokens": 30,
+      "latencyMs": 810,
+      "costUsd": 0.004456,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.698Z",
+      "agent": "security.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2560,
+      "outputTokens": 34,
+      "latencyMs": 858,
+      "costUsd": 0.01092,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:11.953Z",
+      "agent": "release.assemble",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 1589,
+      "outputTokens": 177,
+      "latencyMs": 2574,
+      "costUsd": 0.009896,
+      "simulated": true
+    }
+  ],
+  "actionLedger": [
+    "qa-tests:ca606f95144092ff",
+    "apply:1d1d0e99fb0f7dd7"
+  ],
+  "humanGuidance": [],
+  "iterationBudget": 3
+}

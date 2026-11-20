@@ -1,0 +1,70 @@
+{
+  "runId": "demo-06-provider-failover",
+  "scenario": "06-provider-failover",
+  "status": "AWAITING_APPROVAL",
+  "iterations": 1,
+  "modelCalls": 10,
+  "failedCalls": 3,
+  "inputTokens": 9886,
+  "outputTokens": 4319,
+  "costUsd": 0.0931,
+  "modelLatencyMs": 45704,
+  "simulated": true,
+  "score": 100,
+  "byAgent": {
+    "analyst": {
+      "calls": 1,
+      "inputTokens": 363,
+      "outputTokens": 789,
+      "costUsd": 0.017232,
+      "latencyMs": 9918
+    },
+    "architect": {
+      "calls": 1,
+      "inputTokens": 1787,
+      "outputTokens": 766,
+      "costUsd": 0.022468,
+      "latencyMs": 9642
+    },
+    "qa": {
+      "calls": 2,
+      "inputTokens": 1549,
+      "outputTokens": 939,
+      "costUsd": 0.022748,
+      "latencyMs": 12018
+    },
+    "developer": {
+      "calls": 4,
+      "inputTokens": 2038,
+      "outputTokens": 1614,
+      "costUsd": 0.020216,
+      "latencyMs": 11749
+    },
+    "security": {
+      "calls": 1,
+      "inputTokens": 2560,
+      "outputTokens": 34,
+      "costUsd": 0.00546,
+      "latencyMs": 688
+    },
+    "release": {
+      "calls": 1,
+      "inputTokens": 1589,
+      "outputTokens": 177,
+      "costUsd": 0.004948,
+      "latencyMs": 1689
+    }
+  },
+  "byProvider": {
+    "mock-primary": 6,
+    "mock-secondary": 4
+  },
+  "gates": [
+    {
+      "n": 1,
+      "gate": "pass",
+      "tests": "15/15",
+      "sast": 0
+    }
+  ]
+}

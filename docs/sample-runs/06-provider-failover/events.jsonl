@@ -1,0 +1,37 @@
+{"ts":"2026-11-20T18:35:11.958Z","runId":"demo-06-provider-failover","type":"run.started","message":"Run demo-06-provider-failover started for scenario \"Model provider becomes unavailable mid-workflow: failover\"","data":{"scenario":"06-provider-failover"}}
+{"ts":"2026-11-20T18:35:11.983Z","runId":"demo-06-provider-failover","type":"step.started","step":"intake","message":"Step intake started"}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"workspace.ready","message":"Sandbox workspace created; agent work isolated on branch agent/demo-06-provider-failover (main = baseline c021743)"}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"step.completed","step":"intake","message":"Step intake completed"}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"step.started","step":"analysis","message":"Step analysis started"}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"agent.output","step":"analysis","agent":"analyst","message":"Analyst: 6 acceptance criteria, 6 tasks, 1 open question(s)","data":{"acceptance_criteria":["AC-1","AC-2","AC-3","AC-4","AC-5","AC-6"]}}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"human.question_recorded","message":"Open questions recorded for the approver (not blocking): Should partial refunds be limited by the 180-day refund window in config/gateway.config.json? Assumed out of scope for this change."}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"step.completed","step":"analysis","message":"Step analysis completed"}
+{"ts":"2026-11-20T18:35:11.986Z","runId":"demo-06-provider-failover","type":"step.started","step":"inspection","message":"Step inspection started"}
+{"ts":"2026-11-20T18:35:11.990Z","runId":"demo-06-provider-failover","type":"tool.output","message":"Repository inspected: 7 JS files; strongest keyword matches src/payments.js(payment×51), test/payments.test.js(payment×20), src/payments.js(refund×10), src/payments.js(amount×9)"}
+{"ts":"2026-11-20T18:35:11.990Z","runId":"demo-06-provider-failover","type":"step.completed","step":"inspection","message":"Step inspection completed"}
+{"ts":"2026-11-20T18:35:11.990Z","runId":"demo-06-provider-failover","type":"step.started","step":"architecture","message":"Step architecture started"}
+{"ts":"2026-11-20T18:35:11.991Z","runId":"demo-06-provider-failover","type":"agent.output","step":"architecture","agent":"architect","message":"Architect: 6 impacted components; developer scope = src/refunds.js, src/payments.js, test/refunds.test.js","data":{"forbidden":["src/ledger.js","src/settlement.js","config/gateway.config.json"]}}
+{"ts":"2026-11-20T18:35:11.991Z","runId":"demo-06-provider-failover","type":"step.completed","step":"architecture","message":"Step architecture completed"}
+{"ts":"2026-11-20T18:35:11.991Z","runId":"demo-06-provider-failover","type":"step.started","step":"test_authoring","message":"Step test_authoring started"}
+{"ts":"2026-11-20T18:35:12.012Z","runId":"demo-06-provider-failover","type":"agent.output","step":"test_authoring","agent":"qa","message":"QA wrote test/acceptance/refunds.acceptance.test.js before any implementation, covering AC-1, AC-2, AC-3, AC-4, AC-5, AC-6"}
+{"ts":"2026-11-20T18:35:12.012Z","runId":"demo-06-provider-failover","type":"step.completed","step":"test_authoring","message":"Step test_authoring completed"}
+{"ts":"2026-11-20T18:35:12.013Z","runId":"demo-06-provider-failover","type":"step.started","step":"implementation","message":"Step implementation started"}
+{"ts":"2026-11-20T18:35:12.021Z","runId":"demo-06-provider-failover","type":"iteration.started","step":"implementation","message":"Iteration 1/3"}
+{"ts":"2026-11-20T18:35:12.022Z","runId":"demo-06-provider-failover","type":"provider.retry","message":"mock-primary error: 503 overloaded_error from mock-primary (injected outage). Retry 1/2 in 20ms","data":{"task":"developer.implement","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.042Z","runId":"demo-06-provider-failover","type":"provider.retry","message":"mock-primary error: 503 overloaded_error from mock-primary (injected outage). Retry 2/2 in 40ms","data":{"task":"developer.implement","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.082Z","runId":"demo-06-provider-failover","type":"provider.failover","message":"mock-primary unavailable (503 overloaded_error from mock-primary (injected outage)); circuit opened","data":{"task":"developer.implement","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.083Z","runId":"demo-06-provider-failover","type":"agent.output","step":"implementation","agent":"developer","message":"Developer: Add refund service with cumulative-balance guard, per-payment idempotency keys and REFUND ledger entries (src/payments.js, src/refunds.js, test/refunds.test.js)","data":{"hash":"13b830b4cf183b48"}}
+{"ts":"2026-11-20T18:35:12.106Z","runId":"demo-06-provider-failover","type":"workspace.commit","message":"Applied 3 file(s) on agent/demo-06-provider-failover at a45b6a5"}
+{"ts":"2026-11-20T18:35:12.275Z","runId":"demo-06-provider-failover","type":"tool.output","step":"implementation","message":"Checks: tests 15/15 passed, coverage 93.36%, lint 0, SAST 0","data":{"failures":[]}}
+{"ts":"2026-11-20T18:35:12.276Z","runId":"demo-06-provider-failover","type":"provider.circuit_open","message":"Skipping mock-primary: circuit open","data":{"task":"qa.review","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.281Z","runId":"demo-06-provider-failover","type":"provider.circuit_open","message":"Skipping mock-primary: circuit open","data":{"task":"security.review","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.281Z","runId":"demo-06-provider-failover","type":"gate.passed","step":"implementation","message":"Iteration 1: all gates green"}
+{"ts":"2026-11-20T18:35:12.282Z","runId":"demo-06-provider-failover","type":"step.completed","step":"implementation","message":"Step implementation completed"}
+{"ts":"2026-11-20T18:35:12.283Z","runId":"demo-06-provider-failover","type":"step.started","step":"evaluation","message":"Step evaluation started"}
+{"ts":"2026-11-20T18:35:12.538Z","runId":"demo-06-provider-failover","type":"eval.scored","message":"Rubric score 100/100 (baseline: 85 lines, candidate: 110 lines)"}
+{"ts":"2026-11-20T18:35:12.538Z","runId":"demo-06-provider-failover","type":"step.completed","step":"evaluation","message":"Step evaluation completed"}
+{"ts":"2026-11-20T18:35:12.539Z","runId":"demo-06-provider-failover","type":"step.started","step":"release","message":"Step release started"}
+{"ts":"2026-11-20T18:35:12.543Z","runId":"demo-06-provider-failover","type":"provider.circuit_open","message":"Skipping mock-primary: circuit open","data":{"task":"release.assemble","provider":"mock-primary"}}
+{"ts":"2026-11-20T18:35:12.544Z","runId":"demo-06-provider-failover","type":"agent.output","step":"release","agent":"release","message":"Release: evidence pack assembled, agent recommends \"approve\". Waiting for a human."}
+{"ts":"2026-11-20T18:35:12.544Z","runId":"demo-06-provider-failover","type":"step.completed","step":"release","message":"Step release completed"}
+{"ts":"2026-11-20T18:35:12.544Z","runId":"demo-06-provider-failover","type":"approval.requested","message":"All gates passed. Merge and deployment need human approval."}

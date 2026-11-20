@@ -1,0 +1,6 @@
+{
+  "analyst.clarify": ["analyst.json"],
+  "architect.design": ["architect.json"],
+  "qa.generate_tests": ["qa-tests.json"],
+  "developer.implement": ["dev.v2.json"]
+}

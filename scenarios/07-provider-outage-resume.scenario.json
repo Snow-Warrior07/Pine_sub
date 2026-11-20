@@ -1,0 +1,13 @@
+{
+  "id": "07-provider-outage-resume",
+  "title": "All model providers down: pause, checkpoint and resume",
+  "demonstrates": ["The model provider becomes unavailable mid-workflow", "Persisted workflow state"],
+  "description": "Both providers fail at the developer step. The run pauses with its state checkpointed after the last completed step. On resume, completed steps (analysis, design, acceptance tests) are not repeated and the acceptance-test commit is not re-applied.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": {},
+  "faults": [
+    { "type": "unavailable", "task": "developer.implement", "provider": "any", "times": 99, "firstRunOnly": true }
+  ],
+  "expect": { "status": "PAUSED" }
+}

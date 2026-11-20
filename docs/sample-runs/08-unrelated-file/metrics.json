@@ -1,0 +1,75 @@
+{
+  "runId": "demo-08-unrelated-file",
+  "scenario": "08-unrelated-file",
+  "status": "AWAITING_APPROVAL",
+  "iterations": 2,
+  "modelCalls": 8,
+  "failedCalls": 0,
+  "inputTokens": 11969,
+  "outputTokens": 6063,
+  "costUsd": 0.1691,
+  "modelLatencyMs": 76356,
+  "simulated": true,
+  "score": 98,
+  "byAgent": {
+    "analyst": {
+      "calls": 1,
+      "inputTokens": 363,
+      "outputTokens": 789,
+      "costUsd": 0.017232,
+      "latencyMs": 9918
+    },
+    "architect": {
+      "calls": 1,
+      "inputTokens": 1787,
+      "outputTokens": 766,
+      "costUsd": 0.022468,
+      "latencyMs": 9642
+    },
+    "qa": {
+      "calls": 2,
+      "inputTokens": 1550,
+      "outputTokens": 939,
+      "costUsd": 0.024980000000000002,
+      "latencyMs": 12168
+    },
+    "developer": {
+      "calls": 2,
+      "inputTokens": 4120,
+      "outputTokens": 3358,
+      "costUsd": 0.08363999999999999,
+      "latencyMs": 41196
+    },
+    "security": {
+      "calls": 1,
+      "inputTokens": 2560,
+      "outputTokens": 34,
+      "costUsd": 0.01092,
+      "latencyMs": 858
+    },
+    "release": {
+      "calls": 1,
+      "inputTokens": 1589,
+      "outputTokens": 177,
+      "costUsd": 0.009896,
+      "latencyMs": 2574
+    }
+  },
+  "byProvider": {
+    "mock-primary": 8
+  },
+  "gates": [
+    {
+      "n": 1,
+      "gate": "blocked_by_policy",
+      "tests": "-",
+      "sast": 0
+    },
+    {
+      "n": 2,
+      "gate": "pass",
+      "tests": "15/15",
+      "sast": 0
+    }
+  ]
+}

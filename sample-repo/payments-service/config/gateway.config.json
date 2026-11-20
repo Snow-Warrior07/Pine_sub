@@ -1,0 +1,5 @@
+{
+  "acquirer": "sandbox-acquirer",
+  "settlementCutoffHourIST": 23,
+  "maxRefundWindowDays": 180
+}

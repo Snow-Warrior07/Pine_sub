@@ -1,0 +1,5 @@
+{
+  "test_file": "test/acceptance/refunds.acceptance.test.js",
+  "content": { "$fixture": "code/refunds.acceptance.test.js" },
+  "criteria_covered": ["AC-1", "AC-2", "AC-3", "AC-4", "AC-5", "AC-6"]
+}

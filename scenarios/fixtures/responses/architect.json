@@ -1,0 +1,31 @@
+{
+  "impacted_components": [
+    { "path": "src/refunds.js", "change_type": "create", "reason": "New refund service: partial refunds, cumulative guard, idempotency index." },
+    { "path": "src/payments.js", "change_type": "modify", "reason": "Add PARTIALLY_REFUNDED status and refundedAmount field; keep refundPayment behaviour." },
+    { "path": "test/refunds.test.js", "change_type": "create", "reason": "Developer unit tests for the refund service." },
+    { "path": "src/ledger.js", "change_type": "read_only", "reason": "Refunds are recorded with the existing REFUND entry type." },
+    { "path": "src/settlement.js", "change_type": "read_only", "reason": "Already nets REFUND entries per merchant; no change needed." },
+    { "path": "src/logger.js", "change_type": "read_only", "reason": "Use redact() or log identifiers only." }
+  ],
+  "approach": "Add a createRefundService(store) module that validates the amount, checks the payment is CAPTURED or PARTIALLY_REFUNDED, enforces refundedAmount + amount <= amount, deduplicates on (paymentId, idempotencyKey), updates the payment status and writes a REFUND ledger entry referencing the refund id.",
+  "api_contract": [
+    "createRefundService(store) -> { refund({ paymentId, amount, idempotencyKey }) -> { id, paymentId, amount, idempotencyKey, status: 'SUCCEEDED' }, listRefunds(paymentId) -> refund[] }",
+    "refund() throws when idempotencyKey is missing, the amount is invalid, the payment is not refundable, or the amount exceeds the remaining balance",
+    "payments gain refundedAmount (paise) and the PaymentStatus.PARTIALLY_REFUNDED status"
+  ],
+  "allowed_files": ["src/refunds.js", "src/payments.js", "test/refunds.test.js"],
+  "forbidden_files": [
+    { "path": "src/ledger.js", "reason": "Owned by the Finance platform team; entry types are a closed set (ADR-2)." },
+    { "path": "src/settlement.js", "reason": "Owned by the Settlements team; unaffected by this change." },
+    { "path": "config/gateway.config.json", "reason": "Protected configuration (SRE)." }
+  ],
+  "decisions": [
+    { "id": "ADR-1", "decision": "Partial refunds live in a new module, src/refunds.js", "rationale": "Keeps payments.js small and isolates the new behaviour for review and rollback." },
+    { "id": "ADR-2", "decision": "Use the existing REFUND ledger entry type for partial refunds", "rationale": "Ledger entry types are agreed with Finance; settlement already nets REFUND entries correctly." },
+    { "id": "ADR-3", "decision": "Idempotency keys are scoped per payment and stored in memory for now", "rationale": "Matches the in-memory store; flagged as a known risk for multi-instance deployment." }
+  ],
+  "risks": [
+    "In-memory idempotency index is lost on restart.",
+    "Concurrent refunds on one payment are not serialised."
+  ]
+}

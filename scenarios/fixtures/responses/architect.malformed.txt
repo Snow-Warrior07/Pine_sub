@@ -1,0 +1,7 @@
+Sure! Here is my proposed design for partial refunds:
+
+```json
+{
+  "impacted_components": [
+    { "path": "src/refunds.js", "change_type": "create", "reason": "New refund service" },
+    { "path": "src/payments.js", "change_type": "modify", "reason": "Add PARTIALLY_REF

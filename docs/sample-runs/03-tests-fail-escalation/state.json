@@ -1,0 +1,764 @@
+{
+  "runId": "demo-03-tests-fail-escalation",
+  "scenario": "03-tests-fail-escalation",
+  "requirementPath": "requirements/REQ-101-partial-refunds.md",
+  "requirementText": "# REQ-101: Partial refunds for captured payments\n\n**Requested by:** Merchant Experience PM\n**Priority:** P1 (top merchant ask this quarter)\n\nMerchants today can only refund the full amount of a payment. They need to refund part\nof a captured payment, for example when one item of a multi-item order is returned.\n\n- A captured payment can be refunded in one or more parts.\n- The total refunded must never exceed the captured amount.\n- Merchants' systems retry on network failures, so a retried refund request must not\n  refund twice.\n- Finance needs every refund to appear in the ledger.\n- Card numbers must never appear in logs (PCI DSS).\n",
+  "repoPath": "sample-repo/payments-service",
+  "workspace": "/home/user/Pine_sub/runs/demo-03-tests-fail-escalation/workspace",
+  "branch": "agent/demo-03-tests-fail-escalation",
+  "status": "ESCALATED",
+  "statusReason": "Iteration budget exhausted: 3 implementation attempts did not pass all gates",
+  "createdAt": "2026-11-20T18:35:10.037Z",
+  "updatedAt": "2026-11-20T18:35:10.684Z",
+  "completedSteps": [
+    "intake",
+    "analysis",
+    "inspection",
+    "architecture",
+    "test_authoring"
+  ],
+  "resumeCount": 0,
+  "artifacts": {
+    "iterations": [
+      {
+        "n": 1,
+        "developerSummary": "Add refund service with amount validation, idempotency keys and REFUND ledger entries",
+        "filesChanged": [
+          "src/payments.js",
+          "src/refunds.js",
+          "test/refunds.test.js"
+        ],
+        "changesetHash": "67864be6dca7bb0c",
+        "policyViolations": [],
+        "deviations": [],
+        "gate": "fail",
+        "feedback": [
+          "QA: Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        ],
+        "checks": {
+          "tests": {
+            "passed": 14,
+            "failed": 1,
+            "total": 15,
+            "failures": [
+              {
+                "name": "AC-2 cumulative refunds can never exceed the captured amount",
+                "message": "Missing expected exception."
+              }
+            ],
+            "durationMs": 166,
+            "timedOut": false,
+            "rawTail": "  duration_ms: 0.501783\n  type: 'test'\n  ...\n# Subtest: rejects a single refund larger than the payment\nok 15 - rejects a single refund larger than the payment\n  ---\n  duration_ms: 0.271915\n  type: 'test'\n  ...\n1..15\n# tests 15\n# suites 0\n# pass 14\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 100.623196\n# start of coverage report\n# -----------------------------------------------------------------------------\n# file                         | line % | branch % | funcs % | uncovered lines\n# -----------------------------------------------------------------------------\n# src                          |        |          |         | \n#  ledger.js                   |  75.00 |    66.67 |   50.00 | 7-8 15-16\n#  logger.js                   | 100.00 |    91.67 |   75.00 | \n#  money.js                    |  81.82 |   100.00 |   50.00 | 10-11\n#  payments.js                 |  96.67 |    72.73 |  100.00 | 38-39\n#  refunds.js                  | 100.00 |    88.89 |  100.00 | \n#  settlement.js               | 100.00 |    85.71 |  100.00 | \n#  store.js                    | 100.00 |   100.00 |  100.00 | \n# test                         |        |          |         | \n#  acceptance                  |        |          |         | \n#   refunds.acceptance.test.js | 100.00 |   100.00 |  100.00 | \n#  payments.test.js            | 100.00 |   100.00 |  100.00 | \n#  refunds.test.js             | 100.00 |   100.00 |  100.00 | \n# -----------------------------------------------------------------------------\n# all files                    |  97.65 |    91.40 |   94.12 | \n# -----------------------------------------------------------------------------\n# end of coverage report\n"
+          },
+          "coverage": {
+            "linePct": 93.36,
+            "threshold": 80,
+            "ok": true
+          },
+          "lint": [],
+          "sast": []
+        },
+        "qa": {
+          "verdict": "fail",
+          "failing_criteria": [
+            "AC-2"
+          ],
+          "feedback_for_developer": "Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        },
+        "security": {
+          "verdict": "pass",
+          "findings": [],
+          "summary": "No blocking findings. Diff reviewed for PAN exposure, secrets, injection and authorisation."
+        }
+      },
+      {
+        "n": 2,
+        "developerSummary": "Address feedback: validate refund amount against the payment",
+        "filesChanged": [
+          "src/payments.js",
+          "src/refunds.js",
+          "test/refunds.test.js"
+        ],
+        "changesetHash": "f0ab4c2f60cf7b0e",
+        "policyViolations": [],
+        "deviations": [],
+        "gate": "fail",
+        "feedback": [
+          "QA: Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        ],
+        "checks": {
+          "tests": {
+            "passed": 14,
+            "failed": 1,
+            "total": 15,
+            "failures": [
+              {
+                "name": "AC-2 cumulative refunds can never exceed the captured amount",
+                "message": "Missing expected exception."
+              }
+            ],
+            "durationMs": 150,
+            "timedOut": false,
+            "rawTail": "  duration_ms: 0.588136\n  type: 'test'\n  ...\n# Subtest: rejects a single refund larger than the payment\nok 15 - rejects a single refund larger than the payment\n  ---\n  duration_ms: 0.185934\n  type: 'test'\n  ...\n1..15\n# tests 15\n# suites 0\n# pass 14\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 92.821892\n# start of coverage report\n# -----------------------------------------------------------------------------\n# file                         | line % | branch % | funcs % | uncovered lines\n# -----------------------------------------------------------------------------\n# src                          |        |          |         | \n#  ledger.js                   |  75.00 |    66.67 |   50.00 | 7-8 15-16\n#  logger.js                   | 100.00 |    91.67 |   75.00 | \n#  money.js                    |  81.82 |   100.00 |   50.00 | 10-11\n#  payments.js                 |  96.67 |    72.73 |  100.00 | 38-39\n#  refunds.js                  | 100.00 |    88.89 |  100.00 | \n#  settlement.js               | 100.00 |    85.71 |  100.00 | \n#  store.js                    | 100.00 |   100.00 |  100.00 | \n# test                         |        |          |         | \n#  acceptance                  |        |          |         | \n#   refunds.acceptance.test.js | 100.00 |   100.00 |  100.00 | \n#  payments.test.js            | 100.00 |   100.00 |  100.00 | \n#  refunds.test.js             | 100.00 |   100.00 |  100.00 | \n# -----------------------------------------------------------------------------\n# all files                    |  97.66 |    91.40 |   94.12 | \n# -----------------------------------------------------------------------------\n# end of coverage report\n"
+          },
+          "coverage": {
+            "linePct": 93.36,
+            "threshold": 80,
+            "ok": true
+          },
+          "lint": [],
+          "sast": []
+        },
+        "qa": {
+          "verdict": "fail",
+          "failing_criteria": [
+            "AC-2"
+          ],
+          "feedback_for_developer": "Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        },
+        "security": {
+          "verdict": "pass",
+          "findings": [],
+          "summary": "No blocking findings. Diff reviewed for PAN exposure, secrets, injection and authorisation."
+        }
+      },
+      {
+        "n": 3,
+        "developerSummary": "Address feedback: add a second bound on the refund amount",
+        "filesChanged": [
+          "src/payments.js",
+          "src/refunds.js",
+          "test/refunds.test.js"
+        ],
+        "changesetHash": "94c80d721c35c6ae",
+        "policyViolations": [],
+        "deviations": [],
+        "gate": "fail",
+        "feedback": [
+          "QA: Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        ],
+        "checks": {
+          "tests": {
+            "passed": 14,
+            "failed": 1,
+            "total": 15,
+            "failures": [
+              {
+                "name": "AC-2 cumulative refunds can never exceed the captured amount",
+                "message": "Missing expected exception."
+              }
+            ],
+            "durationMs": 156,
+            "timedOut": false,
+            "rawTail": "  duration_ms: 1.300662\n  type: 'test'\n  ...\n# Subtest: rejects a single refund larger than the payment\nok 15 - rejects a single refund larger than the payment\n  ---\n  duration_ms: 0.217117\n  type: 'test'\n  ...\n1..15\n# tests 15\n# suites 0\n# pass 14\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 99.924558\n# start of coverage report\n# -----------------------------------------------------------------------------\n# file                         | line % | branch % | funcs % | uncovered lines\n# -----------------------------------------------------------------------------\n# src                          |        |          |         | \n#  ledger.js                   |  75.00 |    66.67 |   50.00 | 7-8 15-16\n#  logger.js                   | 100.00 |    91.67 |   75.00 | \n#  money.js                    |  81.82 |   100.00 |   50.00 | 10-11\n#  payments.js                 |  96.67 |    72.73 |  100.00 | 38-39\n#  refunds.js                  | 100.00 |    89.47 |  100.00 | \n#  settlement.js               | 100.00 |    85.71 |  100.00 | \n#  store.js                    | 100.00 |   100.00 |  100.00 | \n# test                         |        |          |         | \n#  acceptance                  |        |          |         | \n#   refunds.acceptance.test.js | 100.00 |   100.00 |  100.00 | \n#  payments.test.js            | 100.00 |   100.00 |  100.00 | \n#  refunds.test.js             | 100.00 |   100.00 |  100.00 | \n# -----------------------------------------------------------------------------\n# all files                    |  97.65 |    91.49 |   94.12 | \n# -----------------------------------------------------------------------------\n# end of coverage report\n"
+          },
+          "coverage": {
+            "linePct": 93.36,
+            "threshold": 80,
+            "ok": true
+          },
+          "lint": [],
+          "sast": []
+        },
+        "qa": {
+          "verdict": "fail",
+          "failing_criteria": [
+            "AC-2"
+          ],
+          "feedback_for_developer": "Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+        },
+        "security": {
+          "verdict": "pass",
+          "findings": [],
+          "summary": "No blocking findings. Diff reviewed for PAN exposure, secrets, injection and authorisation."
+        }
+      }
+    ],
+    "analysis": {
+      "summary": "Allow merchants to refund a captured payment in one or more parts, never exceeding the captured amount, safely under client retries, with every refund in the ledger and no card data in logs.",
+      "acceptance_criteria": [
+        {
+          "id": "AC-1",
+          "given": "a CAPTURED payment of INR 100.00",
+          "when": "the merchant refunds INR 30.00",
+          "then": "the refund succeeds, refundedAmount is 3000 paise and the status is PARTIALLY_REFUNDED"
+        },
+        {
+          "id": "AC-2",
+          "given": "a payment with INR 60.00 of 100.00 already refunded",
+          "when": "the merchant requests a further INR 50.00 refund",
+          "then": "the request is rejected and refundedAmount stays 6000 paise"
+        },
+        {
+          "id": "AC-3",
+          "given": "a partially refunded payment",
+          "when": "the remaining balance is refunded",
+          "then": "the status becomes REFUNDED"
+        },
+        {
+          "id": "AC-4",
+          "given": "a refund request with idempotency key K",
+          "when": "the same request with key K is retried",
+          "then": "the original refund is returned and no second refund or ledger entry is created"
+        },
+        {
+          "id": "AC-5",
+          "given": "a payment that is not captured, or an amount that is zero or not whole paise",
+          "when": "a refund is requested",
+          "then": "the request is rejected"
+        },
+        {
+          "id": "AC-6",
+          "given": "any successful refund",
+          "when": "it is processed",
+          "then": "a REFUND ledger entry with the refunded amount exists and no log line contains the card number"
+        }
+      ],
+      "tasks": [
+        {
+          "id": "T-1",
+          "title": "Identify impacted modules and define the refund API",
+          "owner_agent": "architect",
+          "depends_on": []
+        },
+        {
+          "id": "T-2",
+          "title": "Write acceptance tests for AC-1..AC-6",
+          "owner_agent": "qa",
+          "depends_on": [
+            "T-1"
+          ]
+        },
+        {
+          "id": "T-3",
+          "title": "Implement partial refunds with idempotency keys",
+          "owner_agent": "developer",
+          "depends_on": [
+            "T-1"
+          ]
+        },
+        {
+          "id": "T-4",
+          "title": "Run unit, acceptance, coverage and lint checks",
+          "owner_agent": "qa",
+          "depends_on": [
+            "T-2",
+            "T-3"
+          ]
+        },
+        {
+          "id": "T-5",
+          "title": "Security review of the diff (PCI: PAN exposure)",
+          "owner_agent": "security",
+          "depends_on": [
+            "T-3"
+          ]
+        },
+        {
+          "id": "T-6",
+          "title": "Assemble release evidence and request approval",
+          "owner_agent": "release",
+          "depends_on": [
+            "T-4",
+            "T-5"
+          ]
+        }
+      ],
+      "assumptions": [
+        "Amounts are integer paise, as in the existing service.",
+        "Idempotency keys are unique per payment, not globally.",
+        "Existing full-refund behaviour (refundPayment) must keep working."
+      ],
+      "open_questions": [
+        "Should partial refunds be limited by the 180-day refund window in config/gateway.config.json? Assumed out of scope for this change."
+      ],
+      "out_of_scope": [
+        "Refund window enforcement",
+        "Asynchronous refund settlement with the acquirer",
+        "Merchant-facing API endpoints"
+      ]
+    },
+    "inspection": {
+      "files": [
+        {
+          "path": "src/ledger.js",
+          "lines": 17,
+          "exports": [
+            "ENTRY_TYPES",
+            "recordEntry",
+            "entriesFor"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/logger.js",
+          "lines": 25,
+          "exports": [
+            "setLogSink",
+            "redact",
+            "log"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/money.js",
+          "lines": 12,
+          "exports": [
+            "assertAmount",
+            "formatINR"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/payments.js",
+          "lines": 52,
+          "exports": [
+            "PaymentStatus",
+            "createPaymentService"
+          ],
+          "imports": [
+            "src/money.js",
+            "src/ledger.js",
+            "src/logger.js"
+          ]
+        },
+        {
+          "path": "src/settlement.js",
+          "lines": 12,
+          "exports": [
+            "settlementTotals"
+          ],
+          "imports": []
+        },
+        {
+          "path": "src/store.js",
+          "lines": 9,
+          "exports": [
+            "createStore"
+          ],
+          "imports": []
+        },
+        {
+          "path": "test/payments.test.js",
+          "lines": 47,
+          "exports": [],
+          "imports": [
+            "src/store.js",
+            "src/payments.js",
+            "src/logger.js",
+            "src/settlement.js"
+          ]
+        }
+      ],
+      "keywordHits": [
+        {
+          "path": "src/payments.js",
+          "keyword": "payment",
+          "count": 51
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "payment",
+          "count": 20
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "refund",
+          "count": 10
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "amount",
+          "count": 9
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "refund",
+          "count": 8
+        },
+        {
+          "path": "src/money.js",
+          "keyword": "amount",
+          "count": 7
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "payment",
+          "count": 5
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "captured",
+          "count": 5
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "refunded",
+          "count": 4
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "merchant",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "captured",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "merchant",
+          "count": 3
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "amount",
+          "count": 3
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "amount",
+          "count": 2
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "merchant",
+          "count": 2
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "payment",
+          "count": 2
+        },
+        {
+          "path": "src/ledger.js",
+          "keyword": "refund",
+          "count": 1
+        },
+        {
+          "path": "src/logger.js",
+          "keyword": "payment",
+          "count": 1
+        },
+        {
+          "path": "src/payments.js",
+          "keyword": "partial",
+          "count": 1
+        },
+        {
+          "path": "src/settlement.js",
+          "keyword": "amount",
+          "count": 1
+        },
+        {
+          "path": "src/store.js",
+          "keyword": "refund",
+          "count": 1
+        },
+        {
+          "path": "src/store.js",
+          "keyword": "payment",
+          "count": 1
+        },
+        {
+          "path": "test/payments.test.js",
+          "keyword": "refunded",
+          "count": 1
+        }
+      ],
+      "dependents": {
+        "src/money.js": [
+          "src/payments.js"
+        ],
+        "src/ledger.js": [
+          "src/payments.js"
+        ],
+        "src/logger.js": [
+          "src/payments.js",
+          "test/payments.test.js"
+        ],
+        "src/store.js": [
+          "test/payments.test.js"
+        ],
+        "src/payments.js": [
+          "test/payments.test.js"
+        ],
+        "src/settlement.js": [
+          "test/payments.test.js"
+        ]
+      }
+    },
+    "design": {
+      "impacted_components": [
+        {
+          "path": "src/refunds.js",
+          "change_type": "create",
+          "reason": "New refund service: partial refunds, cumulative guard, idempotency index."
+        },
+        {
+          "path": "src/payments.js",
+          "change_type": "modify",
+          "reason": "Add PARTIALLY_REFUNDED status and refundedAmount field; keep refundPayment behaviour."
+        },
+        {
+          "path": "test/refunds.test.js",
+          "change_type": "create",
+          "reason": "Developer unit tests for the refund service."
+        },
+        {
+          "path": "src/ledger.js",
+          "change_type": "read_only",
+          "reason": "Refunds are recorded with the existing REFUND entry type."
+        },
+        {
+          "path": "src/settlement.js",
+          "change_type": "read_only",
+          "reason": "Already nets REFUND entries per merchant; no change needed."
+        },
+        {
+          "path": "src/logger.js",
+          "change_type": "read_only",
+          "reason": "Use redact() or log identifiers only."
+        }
+      ],
+      "approach": "Add a createRefundService(store) module that validates the amount, checks the payment is CAPTURED or PARTIALLY_REFUNDED, enforces refundedAmount + amount <= amount, deduplicates on (paymentId, idempotencyKey), updates the payment status and writes a REFUND ledger entry referencing the refund id.",
+      "api_contract": [
+        "createRefundService(store) -> { refund({ paymentId, amount, idempotencyKey }) -> { id, paymentId, amount, idempotencyKey, status: 'SUCCEEDED' }, listRefunds(paymentId) -> refund[] }",
+        "refund() throws when idempotencyKey is missing, the amount is invalid, the payment is not refundable, or the amount exceeds the remaining balance",
+        "payments gain refundedAmount (paise) and the PaymentStatus.PARTIALLY_REFUNDED status"
+      ],
+      "allowed_files": [
+        "src/refunds.js",
+        "src/payments.js",
+        "test/refunds.test.js"
+      ],
+      "forbidden_files": [
+        {
+          "path": "src/ledger.js",
+          "reason": "Owned by the Finance platform team; entry types are a closed set (ADR-2)."
+        },
+        {
+          "path": "src/settlement.js",
+          "reason": "Owned by the Settlements team; unaffected by this change."
+        },
+        {
+          "path": "config/gateway.config.json",
+          "reason": "Protected configuration (SRE)."
+        }
+      ],
+      "decisions": [
+        {
+          "id": "ADR-1",
+          "decision": "Partial refunds live in a new module, src/refunds.js",
+          "rationale": "Keeps payments.js small and isolates the new behaviour for review and rollback."
+        },
+        {
+          "id": "ADR-2",
+          "decision": "Use the existing REFUND ledger entry type for partial refunds",
+          "rationale": "Ledger entry types are agreed with Finance; settlement already nets REFUND entries correctly."
+        },
+        {
+          "id": "ADR-3",
+          "decision": "Idempotency keys are scoped per payment and stored in memory for now",
+          "rationale": "Matches the in-memory store; flagged as a known risk for multi-instance deployment."
+        }
+      ],
+      "risks": [
+        "In-memory idempotency index is lost on restart.",
+        "Concurrent refunds on one payment are not serialised."
+      ]
+    },
+    "qaTests": {
+      "test_file": "test/acceptance/refunds.acceptance.test.js",
+      "content": "[3386 chars]",
+      "criteria_covered": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ]
+    }
+  },
+  "usage": [
+    {
+      "at": "2026-11-20T18:35:10.065Z",
+      "agent": "analyst.clarify",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 363,
+      "outputTokens": 789,
+      "latencyMs": 9918,
+      "costUsd": 0.017232,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.070Z",
+      "agent": "architect.design",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 1787,
+      "outputTokens": 766,
+      "latencyMs": 9642,
+      "costUsd": 0.022468,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.071Z",
+      "agent": "qa.generate_tests",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 585,
+      "outputTokens": 909,
+      "latencyMs": 11358,
+      "costUsd": 0.02052,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.101Z",
+      "agent": "developer.implement",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2038,
+      "outputTokens": 1605,
+      "latencyMs": 19710,
+      "costUsd": 0.040252,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.297Z",
+      "agent": "qa.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 1005,
+      "outputTokens": 45,
+      "latencyMs": 990,
+      "costUsd": 0.00492,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.297Z",
+      "agent": "security.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2556,
+      "outputTokens": 34,
+      "latencyMs": 858,
+      "costUsd": 0.010904,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.308Z",
+      "agent": "developer.implement",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 3066,
+      "outputTokens": 1612,
+      "latencyMs": 19794,
+      "costUsd": 0.044504,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.488Z",
+      "agent": "qa.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 1004,
+      "outputTokens": 45,
+      "latencyMs": 990,
+      "costUsd": 0.004916,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.488Z",
+      "agent": "security.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2570,
+      "outputTokens": 34,
+      "latencyMs": 858,
+      "costUsd": 0.01096,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.497Z",
+      "agent": "developer.implement",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 3080,
+      "outputTokens": 1604,
+      "latencyMs": 19698,
+      "costUsd": 0.0444,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.683Z",
+      "agent": "qa.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 1004,
+      "outputTokens": 45,
+      "latencyMs": 990,
+      "costUsd": 0.004916,
+      "simulated": true
+    },
+    {
+      "at": "2026-11-20T18:35:10.683Z",
+      "agent": "security.review",
+      "provider": "mock-primary",
+      "model": "claude-opus-5-5",
+      "attempt": 1,
+      "outcome": "ok",
+      "inputTokens": 2562,
+      "outputTokens": 34,
+      "latencyMs": 858,
+      "costUsd": 0.010928,
+      "simulated": true
+    }
+  ],
+  "actionLedger": [
+    "qa-tests:86f4d4fe5e320629",
+    "apply:14cdbffe78b1162a",
+    "apply:b6a2fcb9dd1c27b4",
+    "apply:fd350ec055c5bf40"
+  ],
+  "humanGuidance": [],
+  "iterationBudget": 3,
+  "escalation": {
+    "reason": "Iteration budget exhausted: 3 implementation attempts did not pass all gates",
+    "options": [
+      "Take over the branch manually",
+      "Clarify the requirement or design and start a new run",
+      "Reject the run"
+    ],
+    "context": {
+      "lastFeedback": [
+        "QA: Test \"AC-2 cumulative refunds can never exceed the captured amount\" failed: Missing expected exception."
+      ]
+    }
+  }
+}

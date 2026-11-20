@@ -1,0 +1,33 @@
+{
+  "summary": "Add refund service with amount validation, idempotency keys and REFUND ledger entries",
+  "changes": [
+    {
+      "path": "src/payments.js",
+      "action": "modify",
+      "content": {
+        "$fixture": "code/payments.v2.js"
+      }
+    },
+    {
+      "path": "src/refunds.js",
+      "action": "create",
+      "content": {
+        "$fixture": "code/refunds.v1-bug.js"
+      }
+    },
+    {
+      "path": "test/refunds.test.js",
+      "action": "create",
+      "content": {
+        "$fixture": "code/refunds.dev.test.js"
+      }
+    }
+  ],
+  "design_deviations": [],
+  "tests_added": [
+    "partially refunds a captured payment",
+    "returns the same refund for a repeated idempotency key",
+    "requires an idempotency key",
+    "rejects a single refund larger than the payment"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "04-security-critical",
+  "title": "Security review finds a critical issue",
+  "demonstrates": ["Security review finds a critical issue"],
+  "description": "The first implementation logs the whole payment object, including the card number (PCI DSS violation). The static scanner raises PCI-001 (critical) and the security agent confirms it, which blocks the release path regardless of other results. The developer fixes it in iteration 2.",
+  "requirement": "requirements/REQ-101-partial-refunds.md",
+  "repo": "sample-repo/payments-service",
+  "script": { "developer.implement": ["dev.v1-panleak.json", "dev.v2.json"] },
+  "faults": [],
+  "expect": { "status": "AWAITING_APPROVAL", "iterations": 2 }
+}

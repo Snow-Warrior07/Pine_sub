@@ -1,0 +1,28 @@
+{
+  "summary": "Allow merchants to refund a captured payment in one or more parts, never exceeding the captured amount, safely under client retries, with every refund in the ledger and no card data in logs.",
+  "acceptance_criteria": [
+    { "id": "AC-1", "given": "a CAPTURED payment of INR 100.00", "when": "the merchant refunds INR 30.00", "then": "the refund succeeds, refundedAmount is 3000 paise and the status is PARTIALLY_REFUNDED" },
+    { "id": "AC-2", "given": "a payment with INR 60.00 of 100.00 already refunded", "when": "the merchant requests a further INR 50.00 refund", "then": "the request is rejected and refundedAmount stays 6000 paise" },
+    { "id": "AC-3", "given": "a partially refunded payment", "when": "the remaining balance is refunded", "then": "the status becomes REFUNDED" },
+    { "id": "AC-4", "given": "a refund request with idempotency key K", "when": "the same request with key K is retried", "then": "the original refund is returned and no second refund or ledger entry is created" },
+    { "id": "AC-5", "given": "a payment that is not captured, or an amount that is zero or not whole paise", "when": "a refund is requested", "then": "the request is rejected" },
+    { "id": "AC-6", "given": "any successful refund", "when": "it is processed", "then": "a REFUND ledger entry with the refunded amount exists and no log line contains the card number" }
+  ],
+  "tasks": [
+    { "id": "T-1", "title": "Identify impacted modules and define the refund API", "owner_agent": "architect", "depends_on": [] },
+    { "id": "T-2", "title": "Write acceptance tests for AC-1..AC-6", "owner_agent": "qa", "depends_on": ["T-1"] },
+    { "id": "T-3", "title": "Implement partial refunds with idempotency keys", "owner_agent": "developer", "depends_on": ["T-1"] },
+    { "id": "T-4", "title": "Run unit, acceptance, coverage and lint checks", "owner_agent": "qa", "depends_on": ["T-2", "T-3"] },
+    { "id": "T-5", "title": "Security review of the diff (PCI: PAN exposure)", "owner_agent": "security", "depends_on": ["T-3"] },
+    { "id": "T-6", "title": "Assemble release evidence and request approval", "owner_agent": "release", "depends_on": ["T-4", "T-5"] }
+  ],
+  "assumptions": [
+    "Amounts are integer paise, as in the existing service.",
+    "Idempotency keys are unique per payment, not globally.",
+    "Existing full-refund behaviour (refundPayment) must keep working."
+  ],
+  "open_questions": [
+    "Should partial refunds be limited by the 180-day refund window in config/gateway.config.json? Assumed out of scope for this change."
+  ],
+  "out_of_scope": ["Refund window enforcement", "Asynchronous refund settlement with the acquirer", "Merchant-facing API endpoints"]
+}
