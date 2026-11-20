@@ -1,0 +1,8 @@
+.env
+.git
+node_modules
+traces/
+report-*.md
+*.jsonl
+.gitignore
+README.md

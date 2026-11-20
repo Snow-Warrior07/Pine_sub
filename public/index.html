@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZeroDayOS — AI AppSec Team</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/tailwind.css" />
+    <style>
+      :root {
+        --bg: #080c10;
+        --surface: #0f1923;
+        --surface-2: #132130;
+        --border: #1a2a3a;
+        --text: #001c35;
+        --muted: #4a6375;
+        --accent: #00d4ff;
+        --success: #008949;
+        --warn: #ffb800;
+        --error: #ff3b5c;
+        --chip: #0b141d;
+      }
+
+      @font-face {
+        font-family: "ClashDisplay";
+        src: url("/ClashDisplay-Variable.ttf") format("truetype");
+        font-style: normal;
+        font-display: swap;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            circle at 18% 0%,
+            rgba(0, 119, 204, 0.1),
+            transparent 36%
+          ),
+          radial-gradient(
+            circle at 90% 12%,
+            rgba(0, 122, 61, 0.07),
+            transparent 30%
+          ),
+          linear-gradient(180deg, #e8f0f8 0%, #f0f4f8 60%);
+        color: var(--text);
+        font-family: ClashDisplay, system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+        padding: 36px 24px 64px;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+        background-size: 30px 30px;
+        opacity: 0.4;
+        z-index: -2;
+      }
+
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(transparent 0%, rgba(0, 0, 0, 0.04) 100%);
+        z-index: -1;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 980px;
+      }
+
+      .masthead {
+        margin-bottom: 26px;
+        position: relative;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background:
+          radial-gradient(
+            circle at 16% 0%,
+            rgba(0, 119, 204, 0.12),
+            transparent 36%
+          ),
+          linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.98),
+            rgba(235, 243, 252, 0.97)
+          );
+        padding: 34px 30px 40px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 22px 50px rgba(0, 60, 120, 0.1);
+      }
+
+      .wordmark {
+        display: block;
+        margin-bottom: 14px;
+      }
+
+      .wordmark-badge {
+        display: inline-block;
+        font-family: ClashDisplay, system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--accent);
+        padding: 8px 12px;
+        border: 1px solid rgba(0, 119, 204, 0.35);
+        background: rgba(0, 119, 204, 0.07);
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        margin-bottom: 12px;
+      }
+
+      h1 {
+        font-size: 84px;
+        letter-spacing: -2px;
+        line-height: 0.94;
+        font-weight: 800;
+        max-width: 920px;
+        margin-bottom: 12px;
+        text-wrap: balance;
+      }
+
+      .subtitle {
+        color: #3d6080;
+        font-size: 24px;
+        letter-spacing: -0.2px;
+        font-weight: 600;
+        max-width: 820px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.97),
+          rgba(244, 249, 255, 0.95)
+        );
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 4px 20px rgba(0, 60, 120, 0.08);
+        margin-bottom: 18px;
+      }
+
+      .card-title {
+        font-family: ClashDisplay, system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.1px;
+        margin-bottom: 16px;
+        color: #4a7090;
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 8px;
+        color: #3d6080;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        font-family: ClashDisplay, system-ui, sans-serif;
+      }
+
+      .field {
+        width: 100%;
+        margin-bottom: 14px;
+        background: #f5f9fd;
+        border: 1px solid #b8cedd;
+        color: var(--text);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 14px;
+        font-family: ClashDisplay, system-ui, sans-serif;
+        transition:
+          border-color 120ms ease,
+          box-shadow 120ms ease;
+      }
+
+      .field:focus {
+        outline: none;
+        border-color: rgba(0, 119, 204, 0.8);
+        box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.15);
+      }
+
+      #scanBtn {
+        width: 100%;
+        border: 1px solid rgba(0, 119, 204, 0.7);
+        background: linear-gradient(
+          180deg,
+          rgba(0, 119, 204, 0.14),
+          rgba(0, 119, 204, 0.06)
+        );
+        color: #004a8f;
+        border-radius: 8px;
+        padding: 14px;
+        cursor: pointer;
+        font-family: ClashDisplay, system-ui, sans-serif;
+        font-size: 13px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 700;
+        transition:
+          transform 110ms ease,
+          box-shadow 110ms ease,
+          border-color 110ms ease,
+          background 110ms ease;
+        box-shadow:
+          0 0 0 1px rgba(0, 119, 204, 0.15),
+          0 2px 8px rgba(0, 119, 204, 0.12);
+      }
+
+      #scanBtn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: #0099ff;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 119, 204, 0.22),
+          rgba(0, 119, 204, 0.1)
+        );
+        box-shadow:
+          0 0 0 1px rgba(0, 119, 204, 0.3),
+          0 4px 16px rgba(0, 119, 204, 0.18);
+      }
+
+      #scanBtn:disabled {
+        cursor: wait;
+        color: #7a9cb8;
+        border-color: rgba(120, 160, 190, 0.3);
+        background: rgba(120, 160, 190, 0.07);
+        box-shadow: none;
+        transform: none;
+      }
+
+      #activityPanel {
+        display: none;
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      #activityPanel.visible {
+        display: block;
+        animation: panelIn 260ms ease forwards;
+      }
+
+      @keyframes panelIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .pipeline {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .pipeline-step {
+        background: #eaf1f8;
+        border: 1px solid #c2d5e5;
+        color: #6a8fa8;
+        border-radius: 8px;
+        text-align: center;
+        padding: 9px 6px;
+        font-family: ClashDisplay, system-ui, sans-serif;
+        font-size: 11px;
+        transition:
+          border-color 120ms ease,
+          color 120ms ease,
+          background 120ms ease,
+          box-shadow 120ms ease;
+      }
+
+      .pipeline-step.active {
+        border-color: rgba(0, 119, 204, 0.7);
+        color: #004a8f;
+        background: rgba(0, 119, 204, 0.08);
+        box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.15);
+      }
+
+      .pipeline-step.done {
+        border-color: rgba(0, 122, 61, 0.5);
+        color: #004d26;
+        background: rgba(0, 122, 61, 0.07);
+        box-shadow: none;
+      }
+
+      #agentLog {
+        border: 1px solid #c8d6e2;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f8fbfd;
+      }
+
+      .agent-row {
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(180, 210, 230, 0.7);
+        font-size: 13px;
+        position: relative;
+      }
+
+      .agent-row:last-child {
+        border-bottom: none;
+      }
+
+      .agent-icon {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+        border-radius: 7px;
+        background: rgba(0, 119, 204, 0.07);
+        border: 1px solid rgba(0, 119, 204, 0.18);
+      }
+
+      .agent-main {
+        min-width: 0;
+      }
+
+      .agent-meta {
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .agent-name {
+        color: var(--text);
+        font-weight: 600;
+        font-size: 13px;
+      }
+
+      .phase-chip {
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: var(--chip);
+        border: 1px solid #aac5db;
+        color: #b5e4ff;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .agent-message {
+        color: #3d6078;
+        line-height: 1.45;
+        font-size: 12.5px;
+        font-family: "JetBrains Mono", monospace;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      .status {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .status-start {
+        background: rgba(0, 119, 204, 0.12);
+        color: #0055aa;
+        border: 1px solid rgba(0, 119, 204, 0.3);
+      }
+
+      .status-thinking {
+        background: rgba(160, 92, 0, 0.1);
+        border: 1px solid rgba(160, 92, 0, 0.35);
+        color: var(--warn);
+      }
+
+      .status-done {
+        background: rgba(0, 122, 61, 0.12);
+        border: 1px solid rgba(0, 122, 61, 0.4);
+        color: var(--success);
+      }
+
+      .status-error {
+        background: rgba(192, 21, 42, 0.1);
+        border: 1px solid rgba(192, 21, 42, 0.4);
+        color: var(--error);
+      }
+
+      .spinner {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid rgba(160, 92, 0, 0.3);
+        border-top-color: var(--warn);
+        animation: spin 900ms linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .agent-row.thinking {
+        background: linear-gradient(90deg, rgba(160, 92, 0, 0.04), transparent);
+      }
+
+      .agent-row.done {
+        background: linear-gradient(90deg, rgba(0, 122, 61, 0.05), transparent);
+      }
+
+      .agent-row.error {
+        background: linear-gradient(
+          90deg,
+          rgba(192, 21, 42, 0.05),
+          transparent
+        );
+      }
+
+      #resultBox,
+      #errorBox {
+        display: none;
+      }
+
+      #resultBox.visible,
+      #errorBox.visible {
+        display: block;
+      }
+
+      #resultBox.visible {
+        animation: rewardInMiddle 220ms ease;
+      }
+
+      #errorBox.visible {
+        animation: rewardIn 220ms ease;
+      }
+
+      @keyframes rewardIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes rewardInMiddle {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-title {
+        color: var(--success);
+        margin-bottom: 6px;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.9px;
+      }
+
+      .result-heading {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        letter-spacing: -0.4px;
+        color: #0a2a10;
+      }
+
+      .result-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #0055aa;
+        text-decoration: none;
+        word-break: break-all;
+        border-bottom: 1px solid rgba(0, 85, 170, 0.4);
+        padding-bottom: 2px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .result-link:hover {
+        color: #003d80;
+        border-color: rgba(0, 61, 128, 0.8);
+      }
+
+      #resultBox {
+        width: 100%;
+        border: 1px solid rgba(0, 122, 61, 0.4);
+        background: linear-gradient(
+          130deg,
+          rgba(0, 122, 61, 0.07),
+          rgba(245, 252, 248, 0.98)
+        );
+        box-shadow:
+          0 0 0 1px rgba(0, 122, 61, 0.1),
+          0 4px 20px rgba(0, 80, 30, 0.08);
+        margin-bottom: 18px;
+      }
+
+      #scanPanel.hidden {
+        display: none;
+      }
+
+      #errorBox {
+        border-color: rgba(192, 21, 42, 0.35);
+        background: linear-gradient(
+          130deg,
+          rgba(192, 21, 42, 0.06),
+          rgba(255, 248, 249, 0.98)
+        );
+        color: #8b0010;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="masthead">
+        <div
+          class="wordmark"
+          style="
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <span
+            class="wordmark-badge"
+            style="text-align: center; background-color: #003d80"
+            >ZeroDayOS</span
+          >
+          <h1
+            style="letter-spacing: 0.05ch; text-align: center; color: #080c10"
+          >
+            Find. Exploit. Fix. Automatically
+          </h1>
+        </div>
+        <p class="subtitle" style="text-align: center">
+          Bold, confident vulnerability testing with 5 AI engineering team
+          driving one decisive GitHub issue.
+        </p>
+      </header>
+
+      <section class="card" id="scanPanel">
+        <div class="card-title">Scan Input</div>
+        <label class="label" for="repoUrl">Repository URL</label>
+        <input
+          class="field"
+          style="color: #003d80"
+          type="text"
+          id="repoUrl"
+          value="https://github.com/OWASP/NodeGoat"
+          placeholder="https://github.com/OWASP/NodeGoat"
+        />
+
+        <button id="scanBtn" onclick="startScan()">INITIATE SCAN</button>
+      </section>
+
+      <section class="card" id="resultBox">
+        <div class="result-title">Issue Generated</div>
+        <div class="result-heading">Pristine GitHub Issue is Ready</div>
+        <a
+          id="issueLink"
+          class="result-link"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          >View on GitHub -></a
+        >
+      </section>
+
+      <section class="card" id="activityPanel">
+        <div class="card-title">Live Agent Activity</div>
+        <div class="pipeline" id="pipeline"></div>
+        <div id="agentLog"></div>
+      </section>
+
+      <section class="card" id="errorBox"></section>
+    </main>
+
+    <script>
+      const AGENT_META = {
+        Orchestrator: { icon: "O", order: 0 },
+        Recon: { icon: "R", order: 1 },
+        Analyst: { icon: "A", order: 2 },
+        Validator: { icon: "V", order: 3 },
+        Remediation: { icon: "M", order: 4 },
+        Reporter: { icon: "P", order: 5 },
+      };
+
+      const PIPELINE_ORDER = [
+        "Orchestrator",
+        "Recon",
+        "Analyst",
+        "Validator",
+        "Remediation",
+        "Reporter",
+      ];
+      const rowState = new Map();
+
+      function initializePipeline() {
+        const pipeline = document.getElementById("pipeline");
+        pipeline.innerHTML = "";
+        for (const agent of PIPELINE_ORDER) {
+          const step = document.createElement("div");
+          step.className = "pipeline-step";
+          step.id = `pipe-${agent}`;
+          step.textContent = agent;
+          pipeline.appendChild(step);
+        }
+      }
+
+      function resetPipeline() {
+        for (const agent of PIPELINE_ORDER) {
+          const step = document.getElementById(`pipe-${agent}`);
+          if (!step) continue;
+          step.className = "pipeline-step";
+        }
+      }
+
+      function updatePipeline(agent, phase) {
+        const current = AGENT_META[agent];
+        if (!current) return;
+
+        for (const name of PIPELINE_ORDER) {
+          const step = document.getElementById(`pipe-${name}`);
+          if (!step) continue;
+          step.className = "pipeline-step";
+
+          const order = AGENT_META[name].order;
+          if (order < current.order) {
+            step.classList.add("done");
+          }
+        }
+
+        const currentStep = document.getElementById(`pipe-${agent}`);
+        if (!currentStep) return;
+
+        if (phase === "done") {
+          currentStep.classList.add("done");
+        } else if (phase === "error") {
+          currentStep.classList.add("active");
+        } else {
+          currentStep.classList.add("active");
+        }
+      }
+
+      function makeStatus(phase) {
+        if (phase === "thinking") {
+          return '<div class="status status-thinking"><div class="spinner"></div></div>';
+        }
+        if (phase === "done") {
+          return '<div class="status status-done">✓</div>';
+        }
+        if (phase === "error") {
+          return '<div class="status status-error">!</div>';
+        }
+        return '<div class="status status-start">•</div>';
+      }
+
+      function styleRow(row, phase) {
+        row.classList.remove("thinking", "done", "error");
+        if (phase === "thinking") row.classList.add("thinking");
+        if (phase === "done") row.classList.add("done");
+        if (phase === "error") row.classList.add("error");
+      }
+
+      function appendAgent(log, agent, phase, message) {
+        const safeMessage = escHtml(message);
+        const meta = AGENT_META[agent] || { icon: "?" };
+        let row = rowState.get(agent);
+
+        if (!row) {
+          row = document.createElement("div");
+          row.className = "agent-row";
+          row.dataset.agent = agent;
+          row.innerHTML = `
+          <div class="agent-icon">${meta.icon}</div>
+          <div class="agent-main">
+            <div class="agent-meta">
+              <span class="agent-name">${agent}</span>
+              <span class="phase-chip">${phase}</span>
+            </div>
+            <div class="agent-message">${safeMessage}</div>
+          </div>
+          ${makeStatus(phase)}
+        `;
+          log.appendChild(row);
+          rowState.set(agent, row);
+        } else {
+          row.querySelector(".phase-chip").textContent = phase;
+          row.querySelector(".agent-message").textContent = message;
+          row.querySelector(".status").outerHTML = makeStatus(phase);
+        }
+
+        styleRow(row, phase);
+        updatePipeline(agent, phase);
+        row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function showResult(url, title) {
+        const box = document.getElementById("resultBox");
+        const scanPanel = document.getElementById("scanPanel");
+        const heading = box.querySelector(".result-heading");
+        const link = document.getElementById("issueLink");
+        heading.textContent = title || "Pristine GitHub Issue is Ready";
+        link.href = url;
+        link.textContent = `View on GitHub -> ${url}`;
+        scanPanel.classList.add("hidden");
+        box.classList.add("visible");
+      }
+
+      function showError(msg) {
+        const box = document.getElementById("errorBox");
+        box.textContent = `ERROR: ${msg}`;
+        box.classList.add("visible");
+      }
+
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      initializePipeline();
+
+      (function enableAutoReload() {
+        const host = window.location.hostname;
+        if (host !== "localhost" && host !== "127.0.0.1") return;
+
+        const stream = new EventSource("/__dev_reload");
+        stream.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data);
+            if (payload.type === "reload") {
+              window.location.reload();
+            }
+          } catch {
+            return;
+          }
+        };
+      })();
+
+      async function startScan() {
+        const repoUrl = document.getElementById("repoUrl").value.trim();
+
+        if (!repoUrl) {
+          alert("Enter a GitHub repo URL");
+          return;
+        }
+
+        const btn = document.getElementById("scanBtn");
+        btn.disabled = true;
+        btn.textContent = "SCANNING...";
+
+        const log = document.getElementById("agentLog");
+        log.innerHTML = "";
+        rowState.clear();
+        resetPipeline();
+
+        const panel = document.getElementById("activityPanel");
+        const scanPanel = document.getElementById("scanPanel");
+        panel.classList.add("visible");
+
+        scanPanel.classList.remove("hidden");
+        document.getElementById("resultBox").classList.remove("visible");
+        document.getElementById("errorBox").classList.remove("visible");
+
+        try {
+          const resp = await fetch("/scan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ repoUrl }),
+          });
+
+          const reader = resp.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split("\n\n");
+            buffer = parts.pop() || "";
+
+            for (const part of parts) {
+              const line = part.replace(/^data: /, "").trim();
+              if (!line) continue;
+              let ev;
+              try {
+                ev = JSON.parse(line);
+              } catch {
+                continue;
+              }
+
+              if (ev.type === "progress") {
+                appendAgent(log, ev.agent, ev.phase, ev.message);
+              } else if (ev.type === "done") {
+                appendAgent(
+                  log,
+                  "Orchestrator",
+                  "done",
+                  `Issue #${ev.issueNumber} created`,
+                );
+                showResult(ev.issueUrl, ev.issueTitle);
+                btn.disabled = false;
+                btn.textContent = "INITIATE SCAN";
+              } else if (ev.type === "error") {
+                appendAgent(
+                  log,
+                  "Orchestrator",
+                  "error",
+                  ev.message || "Scan failed",
+                );
+                showError(ev.message);
+                btn.disabled = false;
+                btn.textContent = "INITIATE SCAN";
+              }
+            }
+          }
+        } catch (err) {
+          showError(err.message);
+          btn.disabled = false;
+          btn.textContent = "INITIATE SCAN";
+        }
+      }
+    </script>
+  </body>
+</html>

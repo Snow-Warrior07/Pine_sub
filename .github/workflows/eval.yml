@@ -1,0 +1,46 @@
+name: Eval Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  eval:
+    name: Run ZeroDayOS Eval Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20   # 4 fixtures × ~90s each + buffer
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run eval pipeline
+        env:
+          ZEN_API_KEY:            ${{ secrets.ZEN_API_KEY }}
+          ZEN_BASE_URL:           ${{ secrets.ZEN_BASE_URL }}
+          MODEL:                  ${{ secrets.MODEL }}
+          GITHUB_TOKEN:           ${{ secrets.GH_TOKEN }}
+          LANGFUSE_PUBLIC_KEY:    ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY:    ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_HOST:          ${{ secrets.LANGFUSE_HOST }}
+        run: npm run eval
+
+      # Upload the local JSONL traces as an artifact for debugging
+      - name: Upload eval traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-traces
+          path: traces/
+          retention-days: 7
