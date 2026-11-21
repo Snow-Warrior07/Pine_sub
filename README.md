@@ -2,6 +2,8 @@
 
 **Specialised AI agents take one product requirement from idea to a merge-ready change: analysis, design, code, tests, security review and a release pack. A human still makes the final call on merge and deployment.**
 
+**🌐 Project site: [snow-warrior07.github.io/Pine_sub](https://snow-warrior07.github.io/Pine_sub/)**. It has a demo video, an interactive agent pipeline and a replay of every scenario's event log.
+
 This repository is a working vertical slice built for the *Autonomous Enterprise Engineering Organisation* challenge. A requirement for a payments service ("partial refunds") moves through six agents. Deterministic code checks every agent's output, ten failure scenarios are reproducible offline, and the workflow stops at a human approval gate.
 
 > **Run it in one minute.** You need Node.js 22.18 or newer. No API key, network, database or Docker is needed.
@@ -469,6 +471,7 @@ reference/exploitos/      prior multi-agent project used as the architectural re
 - [`docs/WORKPLAN.md`](docs/WORKPLAN.md): the 48-hour plan, milestones and what was cut
 - [`docs/INTERVIEW_GUIDE.md`](docs/INTERVIEW_GUIDE.md): a 5-minute pitch, demo script, likely questions with answers
 - [`docs/sample-runs/`](docs/sample-runs): evidence packs and HTML reports from every scenario
+- [Project site](https://snow-warrior07.github.io/Pine_sub/) ([`site/`](site)): demo video and interactive walkthrough. Rebuild its scenario data with `node scripts/build-site-data.mjs`
 
 ### Credits
 
