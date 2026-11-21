@@ -2,7 +2,7 @@
 
 **Specialised AI agents take one product requirement from idea to a merge-ready change: analysis, design, code, tests, security review and a release pack. A human still makes the final call on merge and deployment.**
 
-**🌐 Project site: [snow-warrior07.github.io/Pine_sub](https://snow-warrior07.github.io/Pine_sub/)**. It has a demo video, an interactive agent pipeline and a replay of every scenario's event log.
+**🌐 Project site: [snow-warrior07.github.io/Pine_sub](https://snow-warrior07.github.io/Pine_sub/)**. It has a demo video, a **live demo** (a no-key simulator where you inject failures and act as the approver, plus a mode that runs the real Analyst and Architect agents on Claude with your own API key), an interactive agent pipeline and a replay of every scenario's event log.
 
 This repository is a working vertical slice built for the *Autonomous Enterprise Engineering Organisation* challenge. A requirement for a payments service ("partial refunds") moves through six agents. Deterministic code checks every agent's output, ten failure scenarios are reproducible offline, and the workflow stops at a human approval gate.
 

@@ -7,7 +7,7 @@
 <meta name="description" content="Six specialised AI agents take one product requirement from idea to a merge-ready change, with deterministic gates and a human approval gate before merge and deploy.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232563eb'/%3E%3Cpath d='M9 22l7-12 7 12' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas>
@@ -17,6 +17,7 @@
     <a class="brand" href="#top">AEO<span>.</span></a>
     <nav aria-label="Sections">
       <a href="#demo">Demo</a>
+      <a href="#live">Live demo</a>
       <a href="#how">How it works</a>
       <a href="#scenarios">Scenarios</a>
       <a href="#autonomy">Autonomy</a>
@@ -36,6 +37,7 @@
     <p class="lead">Six specialised agents take one product requirement through analysis, design, QA-first tests, code, security review and a release pack. Deterministic tools decide pass or fail. Merge and deploy happen only after a named human approves.</p>
     <div class="cta">
       <a class="btn primary" href="#demo">Watch the demo</a>
+      <a class="btn" href="#live">Try it live</a>
       <a class="btn" href="https://github.com/Snow-Warrior07/Pine_sub">View on GitHub</a>
     </div>
     <dl class="stats">
@@ -54,6 +56,66 @@
         <source src="assets/demo.mp4" type="video/mp4">
         Your browser can't play this video. <a href="assets/demo.mp4">Download it</a>.
       </video>
+    </div>
+  </section>
+
+  <section id="live" class="wrap section">
+    <h2>Try it live</h2>
+    <p class="sub">Run the workflow yourself. The simulator needs nothing and lets you inject every failure case. Real Claude sends your own requirement to the Analyst and Architect agents with your API key.</p>
+    <div class="ltabs" role="tablist" aria-label="Live demo mode">
+      <button type="button" role="tab" class="ltab on" data-pane="sim" aria-selected="true">Simulator <small>no key needed</small></button>
+      <button type="button" role="tab" class="ltab" data-pane="real" aria-selected="false">Real Claude <small>your API key</small></button>
+    </div>
+
+    <div class="lpane card" id="sim">
+      <div class="lgrid">
+        <div class="controls">
+          <label class="fld"><span>Start from a scenario</span><select id="sim-preset"></select></label>
+          <div class="fld"><span>Faults to inject</span><div id="sim-faults" class="faults"></div></div>
+          <label class="fld"><span>Iteration budget: <b id="sim-budget-out">3</b></span><input type="range" id="sim-budget" min="1" max="5" value="3"></label>
+          <div class="run-row">
+            <button type="button" class="btn primary" id="sim-run">▶ Run workflow</button>
+            <label class="speed">Speed <select id="sim-speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="5">5×</option></select></label>
+          </div>
+          <p class="note">Runs in your browser with the orchestrator's rules: bounded loops, scope policy, repeat detection, failover, checkpoints and the human gate. Agent outputs are scripted, and tests are not executed here. For real runs, use <code>npm run demo:all</code>.</p>
+        </div>
+        <div class="output">
+          <div class="out-head"><span class="badge" id="sim-badge">Ready</span><div class="gates" id="sim-gates"></div></div>
+          <div class="strip" id="sim-strip">
+            <span data-ag="analyst">Analyst</span><span data-ag="architect">Architect</span><span data-ag="qa">QA</span><span data-ag="developer">Developer</span><span data-ag="security">Security</span><span data-ag="release">Release</span>
+          </div>
+          <div class="term live-term" id="sim-term" aria-live="polite"><div class="ln"><span class="t"></span><span class="a"></span><span>Choose a scenario or faults, then press Run.</span></div></div>
+          <div class="kpis" id="sim-stats"></div>
+          <div id="sim-actions" class="actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lpane card" id="real" hidden>
+      <div class="lgrid">
+        <div class="controls">
+          <label class="fld"><span>Anthropic API key</span><input type="password" id="rm-key" placeholder="sk-ant-…" autocomplete="off" spellcheck="false"></label>
+          <p class="note">Your key stays in this page's memory and goes only from your browser to api.anthropic.com. It is not stored or sent anywhere else. Calls are billed to your account; a run usually costs a few cents.</p>
+          <label class="fld"><span>Model</span><select id="rm-model"><option value="claude-opus-5-5">Claude Opus 5.5 (primary)</option><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (secondary)</option></select></label>
+          <label class="fld"><span>Requirement</span><select id="rm-preset"></select></label>
+          <textarea id="rm-req" rows="9" spellcheck="true"></textarea>
+          <div class="run-row">
+            <button type="button" class="btn primary" id="rm-run">▶ Run Analyst + Architect</button>
+            <button type="button" class="btn" id="rm-stop" disabled>Stop</button>
+          </div>
+          <p class="note">These are the project's real agent prompts. Every response goes through the same JSON extraction, schema validation, repair re-prompts (max 2) and file-scope policy as the orchestrator.</p>
+        </div>
+        <div class="output">
+          <div class="out-head"><span class="badge" id="rm-badge">Ready</span></div>
+          <div class="strip" id="rm-strip">
+            <span data-ag="analyst">Analyst</span><span data-ag="architect">Architect</span><span class="off">QA</span><span class="off">Developer</span><span class="off">Security</span><span class="off">Release</span>
+          </div>
+          <div class="term live-term" id="rm-term" aria-live="polite"><div class="ln"><span class="t"></span><span class="a"></span><span>Enter your key, pick or write a requirement, then press Run.</span></div></div>
+          <details class="stream"><summary>Raw model output (streaming)</summary><pre id="rm-live"></pre></details>
+          <div class="kpis" id="rm-stats"></div>
+          <div id="rm-out" class="rm-out"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -152,6 +214,7 @@
   <a href="https://github.com/Snow-Warrior07/Pine_sub">Source on GitHub</a>
 </footer>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
+<script type="module" src="live.js?v=5"></script>
 </body>
 </html>

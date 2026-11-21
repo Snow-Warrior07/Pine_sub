@@ -47,4 +47,8 @@ for (const id of readdirSync(runsDir).filter((d) => /^\d/.test(d)).sort()) {
 }
 
 writeFileSync(join(out, 'runs.json'), JSON.stringify(runs));
+
+// Static inspection of the sample repository, sent to the architect in the live demo.
+const state = JSON.parse(readFileSync(join(runsDir, '01-happy-path', 'state.json'), 'utf8'));
+writeFileSync(join(out, 'inspection.json'), JSON.stringify(state.artifacts.inspection));
 console.log(`Wrote ${runs.length} runs to site/data/runs.json`);
